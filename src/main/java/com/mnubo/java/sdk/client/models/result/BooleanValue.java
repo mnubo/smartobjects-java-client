@@ -17,21 +17,21 @@ public class BooleanValue implements ResultValue  {
     }
 
     @Override
-    public int intValue() { return (value==true) ? 1 : 0; }
+    public int intValue() { return (value) ? 1 : 0; }
 
     @Override
     public long longValue() {
-        return (value==true) ? 1 : 0;
+        return (value) ? 1 : 0;
     }
 
     @Override
     public float floatValue() {
-        return (value==true) ? 1.0f : 0.0f;
+        return (value) ? 1.0f : 0.0f;
     }
 
     @Override
     public double doubleValue() {
-        return (value==true) ? 1.0 : 0.0;
+        return (value) ? 1.0 : 0.0;
     }
 
     @Override
