@@ -49,6 +49,19 @@ class OwnersSDKServices implements OwnersSDK {
     }
 
     @Override
+    public void unclaim(String username, String deviceId) {
+        notBlank(username, "usermame cannot be blank.");
+        notBlank(deviceId, "x_deviceId cannot be blank.");
+
+        final String url = sdkCommonServices.getIngestionBaseUri()
+                .path(OWNER_PATH)
+                .pathSegment(username, "objects", deviceId, "unclaim")
+                .build().toString();
+
+        sdkCommonServices.postRequest(url);
+    }
+
+    @Override
     public void update(Owner owner, String username) {
         notBlank(username, "usermame cannot be blank.");
 

@@ -86,7 +86,20 @@ public class OwnersSDKServicesTest {
                 @SneakyThrows
                 public void handle(org.restlet.Request request, Response response) {
                     if (request.getMethod().equals(Method.POST)) {
-                        response.setEntity("Ok", MediaType.TEXT_PLAIN);
+                        response.setEntity(null, MediaType.TEXT_PLAIN);
+                    }
+                    else {
+                        response.setStatus(Status.CLIENT_ERROR_METHOD_NOT_ALLOWED);
+                    }
+                }
+            };
+
+            Restlet ownerUnclaimObjectRoute = new Restlet(ctx.restletContext) {
+                @Override
+                @SneakyThrows
+                public void handle(org.restlet.Request request, Response response) {
+                    if (request.getMethod().equals(Method.POST)) {
+                        response.setEntity(null, MediaType.TEXT_PLAIN);
                     }
                     else {
                         response.setStatus(Status.CLIENT_ERROR_METHOD_NOT_ALLOWED);
@@ -150,6 +163,7 @@ public class OwnersSDKServicesTest {
             ctx.router.attach(ctx.baseUrl + "/api/v3/owners", createOrUpdateOwnerRoute);
             ctx.router.attach(ctx.baseUrl + "/api/v3/owners/exists", ownerExistsRoute);
             ctx.router.attach(ctx.baseUrl + "/api/v3/owners/username1/objects/deviceId1/claim", ownerClaimObjectRoute);
+            ctx.router.attach(ctx.baseUrl + "/api/v3/owners/username1/objects/deviceId1/unclaim", ownerUnclaimObjectRoute);
             ctx.router.attach(ctx.baseUrl + "/api/v3/owners/username1", deleteOrUpdateOwnerRoute);
             ctx.router.attach(ctx.baseUrl + "/oauth/token", oauthRoute);
         }
@@ -256,6 +270,55 @@ public class OwnersSDKServicesTest {
     @Test
     public void ownerClaimingObjectThenOk() {
         ownerClient.claim("username1", "deviceId1");
+    }
+
+    @Test
+    public void ownerUnClaimingObjectThenOk() {
+        ownerClient.unclaim("username1", "deviceId1");
+    }
+
+    @Test
+    public void ownerUnclaimingObjectUsernameNullThenFail() {
+
+        String username = null;
+        String deviceId = "deviceId";
+
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expectMessage("usermame cannot be blank.");
+        ownerClient.unclaim(username, deviceId);
+    }
+
+    @Test
+    public void ownerUnclaimingObjectUsernameEmptyThenFail() {
+
+        String username = "";
+        String deviceId = "deviceId";
+
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expectMessage("usermame cannot be blank.");
+        ownerClient.unclaim(username, deviceId);
+    }
+
+    @Test
+    public void ownerUnclaimingObjectDeviceNullThenFail() {
+
+        String username = "username";
+        String deviceId = null;
+
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expectMessage("deviceId cannot be blank.");
+        ownerClient.unclaim(username, deviceId);
+    }
+
+    @Test
+    public void ownerUnclaimingObjectDeviceEmptyThenFail() {
+
+        String username = "username";
+        String deviceId = "";
+
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expectMessage("deviceId cannot be blank.");
+        ownerClient.unclaim(username, deviceId);
     }
 
     @Test

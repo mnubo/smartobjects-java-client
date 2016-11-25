@@ -21,10 +21,18 @@ public interface OwnersSDK {
     /**
      * Allows an owner claim an Object.
      *
-     * @param username, Owner's username how claims the object.
+     * @param username, Owner's username who's claiming the object.
      * @param deviceId, Object's deviceId of the Object claimed.
      */
     void claim(String username, String deviceId);
+
+    /**
+     * Allows an owner unclaim an Object.
+     *
+     * @param username, Owner's username who owns the object.
+     * @param deviceId, Object's deviceId of the Object to be unclaimes.
+     */
+    void unclaim(String username, String deviceId);
 
     /**
      * Allows update an existing owner.
