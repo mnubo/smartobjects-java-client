@@ -209,7 +209,7 @@ public class OwnersSDKServicesTest {
         Owner owner = Owner.builder().withUsername(null).build();
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.create(owner);
     }
 
@@ -219,7 +219,7 @@ public class OwnersSDKServicesTest {
         Owner owner = Owner.builder().withUsername("").build();
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.create(owner);
     }
 
@@ -230,7 +230,7 @@ public class OwnersSDKServicesTest {
         String deviceId = "deviceId";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.claim(username, deviceId);
     }
 
@@ -241,7 +241,7 @@ public class OwnersSDKServicesTest {
         String deviceId = "deviceId";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.claim(username, deviceId);
     }
 
@@ -284,7 +284,7 @@ public class OwnersSDKServicesTest {
         String deviceId = "deviceId";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.unclaim(username, deviceId);
     }
 
@@ -295,7 +295,7 @@ public class OwnersSDKServicesTest {
         String deviceId = "deviceId";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.unclaim(username, deviceId);
     }
 
@@ -331,7 +331,7 @@ public class OwnersSDKServicesTest {
         String username = null;
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.delete(username);
     }
 
@@ -341,7 +341,7 @@ public class OwnersSDKServicesTest {
         String username = "";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.delete(username);
     }
 
@@ -356,7 +356,7 @@ public class OwnersSDKServicesTest {
         String username = null;
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.update(Owner.builder().withUsername(null).build(), username);
     }
 
@@ -366,7 +366,7 @@ public class OwnersSDKServicesTest {
         String username = "";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("usermame cannot be blank.");
+        expectedException.expectMessage("username cannot be blank.");
         ownerClient.update(Owner.builder().withUsername("").build(), username);
     }
 

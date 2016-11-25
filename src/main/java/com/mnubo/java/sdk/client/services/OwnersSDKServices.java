@@ -30,14 +30,14 @@ class OwnersSDKServices implements OwnersSDK {
                                             .build().toString();
 
         validNotNull(owner, "Owner body");
-        notBlank(owner.getUsername(), "usermame cannot be blank.");
+        notBlank(owner.getUsername(), "username cannot be blank.");
 
         sdkCommonServices.postRequest(url, Owner.class, owner);
     }
 
     @Override
     public void claim(String username, String deviceId) {
-        notBlank(username, "usermame cannot be blank.");
+        notBlank(username, "username cannot be blank.");
         notBlank(deviceId, "x_deviceId cannot be blank.");
 
         final String url = sdkCommonServices.getIngestionBaseUri()
@@ -50,7 +50,7 @@ class OwnersSDKServices implements OwnersSDK {
 
     @Override
     public void unclaim(String username, String deviceId) {
-        notBlank(username, "usermame cannot be blank.");
+        notBlank(username, "username cannot be blank.");
         notBlank(deviceId, "x_deviceId cannot be blank.");
 
         final String url = sdkCommonServices.getIngestionBaseUri()
@@ -63,7 +63,7 @@ class OwnersSDKServices implements OwnersSDK {
 
     @Override
     public void update(Owner owner, String username) {
-        notBlank(username, "usermame cannot be blank.");
+        notBlank(username, "username cannot be blank.");
 
         validNotNull(owner, "Owner body");
 
@@ -77,7 +77,7 @@ class OwnersSDKServices implements OwnersSDK {
 
     @Override
     public void delete(String username) {
-        notBlank(username, "usermame cannot be blank.");
+        notBlank(username, "username cannot be blank.");
 
         final String url = sdkCommonServices.getIngestionBaseUri()
                                             .path(OWNER_PATH)
