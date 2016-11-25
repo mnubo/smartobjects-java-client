@@ -5,11 +5,14 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class SearchResult {
+    private final static Log log = LogFactory.getLog(SearchResult.class);
 
-    List<Column> columns;
-    List<List<Object>> rows;
+    private final List<Column> columns;
+    private final List<List<Object>> rows;
 
     @JsonCreator
     public SearchResult(@JsonProperty("columns") List<Column> columns, @JsonProperty("rows") List<List<Object>> rows)
