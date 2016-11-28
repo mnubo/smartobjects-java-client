@@ -252,7 +252,7 @@ public class OwnersSDKServicesTest {
         String deviceId = null;
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("deviceId cannot be blank.");
+        expectedException.expectMessage("x_device_id cannot be blank.");
         ownerClient.claim(username, deviceId);
     }
 
@@ -263,7 +263,7 @@ public class OwnersSDKServicesTest {
         String deviceId = "";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("deviceId cannot be blank.");
+        expectedException.expectMessage("x_device_id cannot be blank.");
         ownerClient.claim(username, deviceId);
     }
 
@@ -306,7 +306,7 @@ public class OwnersSDKServicesTest {
         String deviceId = null;
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("deviceId cannot be blank.");
+        expectedException.expectMessage("x_device_id cannot be blank.");
         ownerClient.unclaim(username, deviceId);
     }
 
@@ -317,7 +317,7 @@ public class OwnersSDKServicesTest {
         String deviceId = "";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("deviceId cannot be blank.");
+        expectedException.expectMessage("x_device_id cannot be blank.");
         ownerClient.unclaim(username, deviceId);
     }
 

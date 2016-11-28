@@ -38,7 +38,7 @@ class OwnersSDKServices implements OwnersSDK {
     @Override
     public void claim(String username, String deviceId) {
         notBlank(username, "username cannot be blank.");
-        notBlank(deviceId, "x_deviceId cannot be blank.");
+        notBlank(deviceId, "x_device_id cannot be blank.");
 
         final String url = sdkCommonServices.getIngestionBaseUri()
                                             .path(OWNER_PATH)
@@ -51,7 +51,7 @@ class OwnersSDKServices implements OwnersSDK {
     @Override
     public void unclaim(String username, String deviceId) {
         notBlank(username, "username cannot be blank.");
-        notBlank(deviceId, "x_deviceId cannot be blank.");
+        notBlank(deviceId, "x_device_id cannot be blank.");
 
         final String url = sdkCommonServices.getIngestionBaseUri()
                 .path(OWNER_PATH)

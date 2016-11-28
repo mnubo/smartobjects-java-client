@@ -228,7 +228,7 @@ public class ObjectsSDKServicesTest {
         String deviceId = null;
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("device_id cannot be blank.");
+        expectedException.expectMessage("x_device_id cannot be blank.");
         objectsClient.delete(deviceId);
     }
 
@@ -238,7 +238,7 @@ public class ObjectsSDKServicesTest {
         String deviceId = "";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("device_id cannot be blank.");
+        expectedException.expectMessage("x_device_id cannot be blank.");
         objectsClient.delete(deviceId);
     }
 
@@ -253,7 +253,7 @@ public class ObjectsSDKServicesTest {
         String deviceId = null;
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("device_id cannot be blank.");
+        expectedException.expectMessage("x_device_id cannot be blank.");
         objectsClient.update(SmartObject.builder().withDeviceId(null).build(), deviceId);
     }
 
@@ -263,7 +263,7 @@ public class ObjectsSDKServicesTest {
         String deviceId = "";
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("device_id cannot be blank.");
+        expectedException.expectMessage("x_device_id cannot be blank.");
         objectsClient.update(SmartObject.builder().withDeviceId("").build(), deviceId);
     }
 
@@ -309,7 +309,7 @@ public class ObjectsSDKServicesTest {
         String deviceId = null;
 
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("deviceId cannot be blank.");
+        expectedException.expectMessage("x_device_id cannot be blank.");
         objectsClient.objectExists(deviceId);
     }
 

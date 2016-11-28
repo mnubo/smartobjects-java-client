@@ -99,7 +99,7 @@ class ObjectsSDKServices implements ObjectsSDK {
 
     @Override
     public Boolean objectExists(String deviceId) {
-        notBlank(deviceId, "deviceId cannot be blank.");
+        notBlank(deviceId, "x_device_id cannot be blank.");
 
         final Map<String, Boolean> subResults = objectsExist(Collections.singletonList(deviceId));
 
