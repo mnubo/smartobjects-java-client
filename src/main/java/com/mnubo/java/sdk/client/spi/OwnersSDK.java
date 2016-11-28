@@ -30,7 +30,7 @@ public interface OwnersSDK {
      * Allows an owner unclaim an Object.
      *
      * @param username, Owner's username who owns the object.
-     * @param deviceId, Object's deviceId of the Object to be unclaimes.
+     * @param deviceId, Object's deviceId of the Object to be unclaimed.
      */
     void unclaim(String username, String deviceId);
 
