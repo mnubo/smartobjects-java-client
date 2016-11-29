@@ -114,6 +114,7 @@ public class SdkClientIntegrationTest {
                         .build();
         try {
             CLIENT.getOwnerClient().create(invalidOwner);
+            fail("should fail because the payload contain an unknown owner attribute");
         } catch (HttpStatusCodeException ex) {
             //expected
         }
@@ -392,11 +393,17 @@ public class SdkClientIntegrationTest {
     public void claimAndUnclaim() throws Exception {
         final UUID uuid = UUID.randomUUID();
         final String username = "username-" + uuid;
+        final String otherUsername = "otherUsername-" + uuid;
         final String deviceId = "deviceId-" + uuid;
 
         final Owner validOwner =
                 Owner.builder()
                         .withUsername(username)
+                        .withPassword("password-" + uuid)
+                        .build();
+        final Owner validOtherOwner =
+                Owner.builder()
+                        .withUsername(otherUsername)
                         .withPassword("password-" + uuid)
                         .build();
 
@@ -409,6 +416,7 @@ public class SdkClientIntegrationTest {
 
         CLIENT.getObjectClient().create(validObject);
         CLIENT.getOwnerClient().create(validOwner);
+        CLIENT.getOwnerClient().create(validOtherOwner);
 
         AssertEventually.that(new Eventually() {
             @Override
@@ -423,6 +431,25 @@ public class SdkClientIntegrationTest {
             }
         });
 
+        try {
+            CLIENT.getOwnerClient().claim("unknownuser-" + uuid, deviceId);
+            fail("should fail because the username does not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
+        }
+        try {
+            CLIENT.getOwnerClient().claim(username, "unknownDevice-" + uuid);
+            fail("should fail because the device id does not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
+        }
+        try {
+            CLIENT.getOwnerClient().claim("unknownuser-" + uuid, "unknownDevice-" + uuid);
+            fail("should fail because the username and device id do not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
+        }
+
         CLIENT.getOwnerClient().claim(username, deviceId);
 
         AssertEventually.that(new Eventually() {
@@ -435,8 +462,26 @@ public class SdkClientIntegrationTest {
             }
         });
 
-        CLIENT.getOwnerClient().unclaim(username, deviceId);
+        try {
+            CLIENT.getOwnerClient().unclaim("unknownuser-" + uuid, deviceId);
+            fail("should fail because the username does not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
+        }
+        try {
+            CLIENT.getOwnerClient().unclaim(username, "unknownDevice-" + uuid);
+            fail("should fail because the device id does not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
+        }
+        try {
+            CLIENT.getOwnerClient().unclaim("unknownuser-" + uuid, "unknownDevice-" + uuid);
+            fail("should fail because the username and device id do not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
+        }
 
+        CLIENT.getOwnerClient().unclaim(username, deviceId);
 
         AssertEventually.that(new Eventually() {
             @Override
@@ -446,6 +491,13 @@ public class SdkClientIntegrationTest {
                 assertThat(objRows.size(), equalTo(0));
             }
         });
+
+        try {
+            CLIENT.getOwnerClient().unclaim(username, deviceId);
+            fail("should fail because the object is already unclaimed");
+        } catch (HttpStatusCodeException ex) {
+            //expected
+        }
 
     }
 
