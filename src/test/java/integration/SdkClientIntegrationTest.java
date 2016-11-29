@@ -17,9 +17,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -304,6 +302,90 @@ public class SdkClientIntegrationTest {
                 equalTo(Collections.singletonMap(event1.getEventId(), true))
         );
 
+    }
+
+    @Test
+    public void batching() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+        final String value1 = "value1";
+        final String value2 = "value2";
+
+        final String username1 = "username-batch1-" + uuid;
+        final String username2 = "username-batch2-" + uuid;
+        final List<Owner> owners = Arrays.asList(
+                Owner.builder()
+                        .withUsername(username1)
+                        .withPassword("password")
+                        .withAddedAttribute(OWNER_TEXT_ATTRIBUTE, value1)
+                        .build(),
+                Owner.builder()
+                        .withUsername(username2)
+                        .withPassword("password")
+                        .withAddedAttribute(OWNER_TEXT_ATTRIBUTE, value2)
+                        .build()
+        );
+        final List<Result> createdOwners = CLIENT.getOwnerClient().createUpdate(owners);
+        assertThat(createdOwners.size(), equalTo(2));
+
+        final String deviceId1 = "deviceId-batch1-" + uuid;
+        final String deviceId2 = "deviceId-batch2-" + uuid;
+        final List<SmartObject> objects = Arrays.asList(
+                SmartObject.builder()
+                        .withDeviceId(deviceId1)
+                        .withObjectType(OBJECT_TYPE)
+                        .withAddedAttribute(OBJECT_TEXT_ATTRIBUTE, value1)
+                        .build(),
+                SmartObject.builder()
+                        .withDeviceId(deviceId2)
+                        .withObjectType(OBJECT_TYPE)
+                        .withAddedAttribute(OBJECT_TEXT_ATTRIBUTE, value2)
+                        .build()
+        );
+        final List<Result> createdObjects = CLIENT.getObjectClient().createUpdate(objects);
+        assertThat(createdObjects.size(), equalTo(2));
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username1));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("username"), equalTo(username1));
+                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(value1));
+            }
+        });
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username2));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("username"), equalTo(username2));
+                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(value2));
+            }
+        });
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId1));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId1));
+                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(value1));
+            }
+        });
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId2));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId2));
+                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(value2));
+            }
+        });
     }
 
     @Test
