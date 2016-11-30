@@ -43,6 +43,8 @@
 
 # mnubo Java SDK
 
+
+[![Build status](https://travis-ci.org/mnubo/smartobjects-net-client.svg?branch=master)](https://travis-ci.org/mnubo/smartobjects-java-client.svg?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mnubo/java-sdk-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mnubo/java-sdk-client)
 
 Introduction
