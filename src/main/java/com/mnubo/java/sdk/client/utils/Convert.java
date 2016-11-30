@@ -74,9 +74,11 @@ public class Convert {
         } else if( value instanceof Double) {
             resultValue = new DoubleValue((Double)value);
         } else if( value instanceof Boolean) {
-            resultValue = new BooleanValue((Boolean)value);
+            resultValue = new BooleanValue((Boolean) value);
+        } else if (value == null){
+            resultValue = null;
         } else {
-            throw new NumberFormatException(format("Unsupported type for value '%s'", value.toString()));
+            throw new IllegalArgumentException(format("Unsupported type for value '%s'", value));
         }
         return resultValue;
     }

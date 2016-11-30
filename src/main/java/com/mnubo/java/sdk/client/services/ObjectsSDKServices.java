@@ -26,8 +26,8 @@ class ObjectsSDKServices implements ObjectsSDK {
     @Override
     public void create(SmartObject object) {
         validNotNull(object, "Object body");
-        notBlank(object.getObjectType(), "x_object_Type cannot be blank.");
-        notBlank(object.getDeviceId(), "x_device_Id cannot be blank.");
+        notBlank(object.getObjectType(), "x_object_type cannot be blank.");
+        notBlank(object.getDeviceId(), "x_device_id cannot be blank.");
 
         final String url = sdkCommonServices.getIngestionBaseUri()
                                             .path(OBJECT_PATH)
@@ -38,7 +38,7 @@ class ObjectsSDKServices implements ObjectsSDK {
 
     @Override
     public void update(SmartObject object, String deviceId) {
-        notBlank(deviceId, "x_device_Id cannot be blank.");
+        notBlank(deviceId, "x_device_id cannot be blank.");
         validNotNull(object, "Object body");
 
         final String url = sdkCommonServices.getIngestionBaseUri()
@@ -51,7 +51,7 @@ class ObjectsSDKServices implements ObjectsSDK {
 
     @Override
     public void delete(String deviceId) {
-        notBlank(deviceId, "x_device_Id cannot be blank.");
+        notBlank(deviceId, "x_device_id cannot be blank.");
 
         final String url = sdkCommonServices.getIngestionBaseUri()
                                             .path(OBJECT_PATH)
@@ -99,7 +99,7 @@ class ObjectsSDKServices implements ObjectsSDK {
 
     @Override
     public Boolean objectExists(String deviceId) {
-        notBlank(deviceId, "deviceId cannot be blank.");
+        notBlank(deviceId, "x_device_id cannot be blank.");
 
         final Map<String, Boolean> subResults = objectsExist(Collections.singletonList(deviceId));
 

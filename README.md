@@ -121,9 +121,6 @@ To create an owner you need to:
 
 This example describes how to create an Owner:
 ```
-//Request a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
@@ -144,9 +141,6 @@ mnuboOwnersClient.create( Owner2Create );
 You can also create an owner using a JSON file:
 
 ```
-//get a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
@@ -166,10 +160,7 @@ The JSON file "myOwnerFile.json" is as follows:
 {
   "username":"john.smith@mycompany.com",
   "x_password":"dud7#%^ddd_J",
-  "x_registration_date":"2015-01-01T00:00:00+04:00",
-  "age":35,
-  "gender":"male",
-  "height":1.80
+  "x_registration_date":"2015-01-01T00:00:00+04:00"
 }
 ```
 
@@ -181,9 +172,6 @@ To update an owner you need to:
 
 This example describes how to update an Owner:
 ```
-//Request a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
@@ -200,9 +188,6 @@ mnuboOwnersClient.update( Owner2Update, "john.smith@mycompany.com" );
 You can also update an owner using a JSON file:
 
 ```
-//get a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
@@ -233,9 +218,6 @@ To create a batch of owners you need to:
 
 This example describes how to create a batch of Owners:
 ```
-//Request a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
@@ -268,10 +250,14 @@ List<Result> results = mnuboOwnersClient.createUpdate( owners );
 
 You can verify if there is any error(s) for the list of owners created / updated.
 
-The API result will contain a list of the username's (id), their results (“success” or “error”)
+The API result will contain a list of the username's (id), their ResultStates
 and a message if an error occurred.
 
-Note: ResultStates is an ENUM with only ResultStates.success (“success”) or ResultStates.error (“error”)
+Note: ResultStates is an ENUM with four values:
+* success
+* error
+* notfound
+* conflict
 
 Here is an example to get the data of the list of Result:
 ```
@@ -286,9 +272,6 @@ Deleting owners
 ---------------
 This example describes how to delete an Owner:
 ```
-//Request a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
@@ -300,9 +283,6 @@ Check if an owner exists
 ------------------------
 This example describes how to validate if an Owner exists:
 ```
-//Request a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
@@ -314,9 +294,6 @@ Check if a batch of owners exist
 --------------------------------
 This example describes how to validate if a list of Owners exists:
 ```
-//Request a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
@@ -331,14 +308,22 @@ Claiming an object
 ------------------
 This example describes how to link an Object with an Owner:
 ```
-//Request a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
 //claim the object
 mnuboOwnersClient.claim( "john.smith@mycompany.com", "my_device_Id" );
+```
+
+Unclaiming an object
+------------------
+This example describes how to link an Object with an Owner:
+```
+//get an Owners client interface
+OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
+
+//claim the object
+mnuboOwnersClient.unclaim( "john.smith@mycompany.com", "my_device_Id" );
 ```
 
 Creating objects
@@ -348,9 +333,6 @@ To create an object:
 2. Build an object.
 
 ```
-//get a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Object client interface
 ObjectsSDK mnuboObjectClient = mnuboClient.getObjectClient();
 
@@ -373,9 +355,6 @@ mnuboObjectClient.create( object2Create );
 You can also create an object using a JSON file
 
 ```
-//get a mnubo client using the basic method.
-MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
-
 //get an Object client interface
 ObjectsSDK mnuboObjectClient = mnuboClient.getObjectClient();
 
@@ -509,10 +488,8 @@ List<Result> results = mnuboObjectClient.createUpdate( objects );
 ```
 You can verify if there is any error(s) for the list of owners created / updated.
 
-The API result will contain a list of the x_device_id's (id), their results (“success” or “error”)
+The API result will contain a list of the x_device_id's (id), their ResultStates
 and a message if an error occurreds.
-
-Note: ResultStates is an ENUM with only ResultStates.success (“success”) or ResultStates.error (“error”)
 
 Here is an example to get the data of the list of Result:
 ```
@@ -653,10 +630,8 @@ The JSON file " myEventsByObjectFile.json " is as follows:
 
 You can verify if there is any error(s) for the list of owners created / updated.
 
-The API result will contain a list of the “x_device_id”s (id), their results (“success” or “error”)
+The API result will contain a list of the “x_device_id”s (id), their ResultStates
 and the message if there is an error.
-
-Note: ResultStates is an ENUM with only ResultStates.success (“success”) or ResultStates.error (“error”)
 
 Here is an example to get the data of the list of Result:
 ```
@@ -780,10 +755,8 @@ The JSON file "myEvents.json" is as follows:
 
 You can verify if there is any error(s) for the list of events sent.
 
-The API result will contain a list of the “event_id”s (id), their results (“success” or “error”)
+The API result will contain a list of the “event_id”s (id), their ResultStates
 and the message if there is an error.
-
-Note: ResultStates is an ENUM with only ResultStates.success (“success”) or ResultStates.error (“error”)
 
 Here is an example to get the data of the list of Result:
 ```

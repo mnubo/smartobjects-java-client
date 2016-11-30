@@ -1,801 +1,538 @@
 package integration;
 
-import static java.lang.String.format;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.runners.MethodSorters.NAME_ASCENDING;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.web.client.HttpClientErrorException;
-
-import com.mnubo.java.sdk.client.models.DataSet;
 import com.mnubo.java.sdk.client.models.Event;
 import com.mnubo.java.sdk.client.models.Owner;
 import com.mnubo.java.sdk.client.models.SmartObject;
 import com.mnubo.java.sdk.client.models.result.Result;
-import com.mnubo.java.sdk.client.models.result.ResultSet;
 import com.mnubo.java.sdk.client.services.MnuboSDKFactory;
 import com.mnubo.java.sdk.client.spi.MnuboSDKClient;
+import lombok.SneakyThrows;
+import lombok.val;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.web.client.HttpStatusCodeException;
 
-/*
-CHANGE_ME: YOU MUST REMOVE OR COMMENT OUT THE 'IGNORE' ANNOTATION TO RUN YOUR INTEGRATION TEST.
- */
-@Ignore
-@FixMethodOrder(NAME_ASCENDING)
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
+
 public class SdkClientIntegrationTest {
     private final static Log log = LogFactory.getLog(SdkClientIntegrationTest.class);
 
-    private final String HOSTNAME = "rest.sandbox.mnubo.com";
+    private final String OWNER_TEXT_ATTRIBUTE = "owner_text_attribute";
+    private final String OBJECT_TEXT_ATTRIBUTE = "object_text_attribute";
+    private final String TS_TEXT_ATTRIBUTE = "ts_text_attribute";
+    private final String OBJECT_TYPE = "object_type1";
+    private final String EVENT_TYPE = "event_type1";
 
-    /*
-    CHANGE_ME: YOU MUST PUT HERE YOUR CONSUMER KEY, DON'T FORGET TO ASK MNUBO FOR THIS.
-     */
-    private final String CONSUMER_KEY = " < CHANGE_ME: PUT HERE YOUR CONSUMER KEY > ";
 
-    /*
-    CHANGE_ME: YOU MUST PUT HERE YOUR CONSUMER SECRET, DON'T FORGET TO ASK MNUBO FOR THIS.
-     */
-    private final String CONSUMER_SECRET = " < CHANGE_ME: PUT HERE YOUR CONSUMER SECRET > ";
+    private static String CONSUMER_KEY;
+    private static String CONSUMER_SECRET;
+    private static final String HOSTNAME = "rest.sandbox.mnubo.com";
+    private static MnuboSDKClient CLIENT;
 
-    private final String DEVICE_ID = "MyDeviceTest01";
-    
-    private final List<String> BATCH_DEVICE_ID = new ArrayList<String>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE OBJECT DEVICE ID(s) DESIRED IN OBJECT PUT REQUESTS (BATCH).
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE DEVICE ID AND IT HAS TO BE ADDED AS THE BELOW 
-        EXAMPLE WITH A VALUE:
-        add("MyDeviceTest01");
-        add("MyDeviceTest02");
-        add("MyDeviceTest03");
-        add("MyDeviceTest04");
-        etc
-         */
-        add(" < CHANGE_ME: PUT HERE THE DEVICE ID(s) > ");
-    }};
 
-    private final String OWNER_USERNAME = "MyOwnerTest01";
-    
-    private final List<String> BATCH_OWNER_USERNAME = new ArrayList<String>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE OWNER USERNAME DESIRED IN OWNER PUT REQUESTS (BATCH).
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE OWNER USERNAME AND IT HAS TO BE ADDED AS THE BELOW 
-        EXAMPLE WITH A VALUE:
-        add("MyOwnerTest01");
-        add("MyOwnerTest02");
-        add("MyOwnerTest03");
-        add("MyOwnerTest04");
-        etc
-         */
-        add(" < CHANGE_ME: PUT HERE THE OWNER'S USERNAME > ");
-    }};
+    private static String SEARCH_OWNER_WITH_PLACEHOLDER;
+    private static String SEARCH_OBJECT_WITH_PLACEHOLDER;
+    private static String SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER;
+    private static String SEARCH_EVENT_WITH_PLACEHOLDER;
 
-    private final String DEVICE_ID_WITH_OWNER_LINK = "MyDeviceTest02";
+    static {
+        try (InputStream input = openResource("credentials.properties")) {
+            final Properties props = new Properties();
+            props.load(input);
 
-    private final String OWNER_USERNAME_WITH_OWNER_LINK = "MyOwnerTest02";
+            CONSUMER_KEY = props.getProperty("consumer.key");
+            CONSUMER_SECRET = props.getProperty("consumer.secret");
+            CLIENT = MnuboSDKFactory.getClient(HOSTNAME, CONSUMER_KEY, CONSUMER_SECRET);
+        } catch (IOException e) {
+            System.out.println("TEST INIT FAILED");
+            e.printStackTrace();
+        }
 
-    private final String EVENT_TYPE = "EventType";
+        try (
+                InputStream searchOwnerInput = openResource("search_owner.json");
+                InputStream searchObjectInput = openResource("search_object.json");
+                InputStream searchObjectByOwnerInput = openResource("search_object_by_owner.json");
+                InputStream searchEventInput = openResource("search_event.json")
+        ) {
+            SEARCH_OWNER_WITH_PLACEHOLDER = IOUtils.toString(searchOwnerInput);
+            SEARCH_OBJECT_WITH_PLACEHOLDER = IOUtils.toString(searchObjectInput);
+            SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER = IOUtils.toString(searchObjectByOwnerInput);
+            SEARCH_EVENT_WITH_PLACEHOLDER = IOUtils.toString(searchEventInput);
+        } catch (IOException e) {
+            System.out.println("TEST INIT FAILED");
+            e.printStackTrace();
+        }
+    }
 
-    private final String OBJECT_TYPE = "ObjectType";
-    
-    private final List<String> BATCH_OBJECT_TYPE = new ArrayList<String>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE LIST OF OBJECT TYPE DESIRED IN OBJECT PUT REQUESTS (BATCH).
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE OBJECT TYPE AND IT HAS TO BE ADDED AS THE BELOW 
-        EXAMPLE WITH A VALUE:
-        add("ObjectType1");
-        add("ObjectType2");
-        add("ObjectType3");
-        add("ObjectType4");
-        etc
-         */
-        add(" < CHANGE_ME: PUT HERE THE OBJECT'S TYPE > ");
-    }};
-
-    private final String OWNER_PASSWORD = "myPassword";
-    
-    private final List<String> BATCH_OWNER_PASSWORD = new ArrayList<String>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE OWNER PASSWORD DESIRED IN OWNER PUT REQUESTS (BATCH).
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE OWNER PASSWORD AND IT HAS TO BE ADDED AS THE BELOW 
-        EXAMPLE WITH A VALUE:
-        add("myPassword1");
-        add("myPassword2");
-        add("myPassword3");
-        add("myPassword4");
-        etc
-         */
-        add(" < CHANGE_ME: PUT HERE THE OWNER'S PASSWORD > ");
-    }};
-
-    private final Map<String, Object> OWNER_ATTRIBUTES = new HashMap<String, Object>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE OWNER ATTRIBUTES DESIRED IN OWNER POST REQUESTS. REMEMBER, EACH ATTRIBUTE NAME
-        HAS TO EXIST IN YOUR OBJECT MODEL DEFINITION AND ITS VALUE HAS TO MATCH ALSO WITH YOUR OBJECT MODEL DEFINITION.
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE ATTRIBUTE AND IT HAS TO BE ADDED AS THE BELOW EXAMPLE WITH A NAME AND A
-        VALUE.
-        put("MyBooleanAttribute", true);
-        put("MyStringAttribute", "String");
-        put("MyIntAttribute", 33);
-        put("MyDoubleAttribute", 10.55);
-        put("MyListAttribute", ["item1", "item2"]);
-        put("MyDatetimeAttribute", "2015-08-28T15:08:37.577Z");
-        etc
-         */
-        put(" < CHANGE_ME: PUT HERE THE ATTRIBUTE'S NAME > ", " < CHANGE_ME: PUT HERE ITS VALUE > ");
-    }};
-    
-    private final List<Map<String, Object>> BATCH_OWNER_ATTRIBUTES = new ArrayList<Map<String, Object>>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE MAP OF OWNER ATTRIBUTES DESIRED IN OWNER PUT REQUESTS FOR BATCH.
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE MAP OF OWNER ATTRIBUTES AND IT HAS TO BE ADDED AS THE BELOW EXAMPLE WITH A NAME AND A
-        VALUE.
-        add(OWNER_ATTRIBUTES_BATCH1);
-        add(OWNER_ATTRIBUTES_BATCH2);
-        add(OWNER_ATTRIBUTES_BATCH3);
-        add(OWNER_ATTRIBUTES_BATCH4);
-        etc
-        NOTE: THIS EXAMPLE SHOW A LIST(BATCH) OF ATTRIBUTES WITH ONLY ONE MAP OF OWNER_ATTRIBUTES, 
-        BUT MULTIPLE MAP OF OWNER_ATTRIBUTES CAN BE ADDED
-         */
-        add(OWNER_ATTRIBUTES); // < CHANGE_ME: PUT HERE THE MAP OF OWNER ATTRIBUTES >
-    }};
-
-    private final Map<String, Object> OBJECT_ATTRIBUTES = new HashMap<String, Object>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE OWNER ATTRIBUTES DESIRED IN OBJECT POST REQUESTS. REMEMBER, EACH ATTRIBUTE NAME
-        HAS TO EXIST IN YOUR OBJECT MODEL DEFINITION AND ITS VALUE HAS TO MATCH ALSO WITH YOUR OBJECT MODEL DEFINITION.
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE ATTRIBUTE AND IT HAS TO BE ADDED AS THE BELOW EXAMPLE WITH A NAME AND A
-        VALUE.
-        put("MyBooleanAttribute", true);
-        put("MyStringAttribute", "String");
-        put("MyIntAttribute", 33);
-        put("MyDoubleAttribute", 10.55);
-        put("MyListAttribute", ["item1", "item2"]);
-        put("MyDatetimeAttribute", "2015-08-28T15:08:37.577Z");
-        etc
-         */
-        put(" < CHANGE_ME: PUT HERE THE ATTRIBUTE'S NAME > ", " < CHANGE_ME: PUT HERE ITS VALUE > ");
-    }};
-    
-    private final List<Map<String, Object>> BATCH_OBJECT_ATTRIBUTES = new ArrayList<Map<String, Object>>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE MAP OF OBJECT ATTRIBUTES DESIRED IN OBJECT PUT REQUESTS FOR BATCH.
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE MAP OF OBJECT ATTRIBUTES AND IT HAS TO BE ADDED AS THE BELOW EXAMPLE WITH A NAME AND A
-        VALUE.
-        add(OBJECT_ATTRIBUTES_BATCH1);
-        add(OBJECT_ATTRIBUTES_BATCH2);
-        add(OBJECT_ATTRIBUTES_BATCH3);
-        add(OBJECT_ATTRIBUTES_BATCH4);
-        etc
-        NOTE: THIS EXAMPLE SHOW A LIST(BATCH) OF ATTRIBUTES WITH ONLY ONE MAP OF OWNER_ATTRIBUTES, 
-        BUT MULTIPLE MAP OF OWNER_ATTRIBUTES CAN BE ADDED
-         */
-        add(OBJECT_ATTRIBUTES); // < CHANGE_ME: PUT HERE THE MAP OF OBJECT ATTRIBUTES >
-    }};
-
-    private final Map<String, Object> OWNER_ATTRIBUTES_2_UPDATE = new HashMap<String, Object>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE OWNER ATTRIBUTES DESIRED IN OWNER PUT REQUESTS. REMEMBER, EACH ATTRIBUTE NAME
-        HAS TO EXIST IN YOUR OBJECT MODEL DEFINITION AND ITS VALUE HAS TO MATCH ALSO WITH YOUR OBJECT MODEL DEFINITION.
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE ATTRIBUTE AND IT HAS TO BE ADDED AS THE BELOW EXAMPLE WITH A NAME AND A
-        VALUE.
-        put("MyBooleanAttribute", true);
-        put("MyStringAttribute", "String");
-        put("MyIntAttribute", 33);
-        put("MyDoubleAttribute", 10.55);
-        put("MyListAttribute", ["item1", "item2"]);
-        put("MyDatetimeAttribute", "2015-08-28T15:08:37.577Z");
-        etc
-         */
-        put(" < CHANGE_ME: PUT HERE THE ATTRIBUTE'S NAME > ", " < CHANGE_ME: PUT HERE ITS VALUE > ");
-    }};
-
-    private final Map<String, Object> OBJECT_ATTRIBUTES_2_UPDATE = new HashMap<String, Object>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE OWNER ATTRIBUTES DESIRED IN OBJECT PUT REQUESTS. REMEMBER, EACH ATTRIBUTE NAME
-        HAS TO EXIST IN YOUR OBJECT MODEL DEFINITION AND ITS VALUE HAS TO MATCH ALSO WITH YOUR OBJECT MODEL DEFINITION.
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE ATTRIBUTE AND IT HAS TO BE ADDED AS THE BELOW EXAMPLE WITH A NAME AND A
-        VALUE.
-        put("MyBooleanAttribute", true);
-        put("MyStringAttribute", "String");
-        put("MyIntAttribute", 33);
-        put("MyDoubleAttribute", 10.55);
-        put("MyListAttribute", ["item1", "item2"]);
-        put("MyDatetimeAttribute", "2015-08-28T15:08:37.577Z");
-        etc
-         */
-        put(" < CHANGE_ME: PUT HERE THE ATTRIBUTE'S NAME > ", " < CHANGE_ME: PUT HERE ITS VALUE > ");
-    }};
-
-    private final Map<String, Object> TIMESERIES_2_POST = new HashMap<String, Object>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE TIMESERIES DESIRED IN POST EVENTS. REMEMBER, EACH TIMESERIE NAME HAS TO EXIST
-        IN YOUR OBJECT MODEL DEFINITION AND ITS VALUE HAS TO MATCH ALSO WITH YOUR OBJECT MODEL DEFINITION.
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE ATTRIBUTE AND IT HAS TO BE ADDED AS THE BELOW EXAMPLE WITH A NAME AND A
-        VALUE.
-        put("MyBooleanAttribute", true);
-        put("MyStringAttribute", "String");
-        put("MyIntAttribute", 33);
-        put("MyDoubleAttribute", 10.55);
-        put("MyListAttribute", ["item1", "item2"]);
-        put("MyDatetimeAttribute", "2015-08-28T15:08:37.577Z");
-        etc
-         */
-        put(" < CHANGE_ME: PUT HERE THE TIMESERIE'S NAME > ", " < CHANGE_ME: PUT HERE ITS VALUE > ");
-    }};
-
-    private final Map<String, Object> EXTRA_TIMESERIES_2_POST = new HashMap<String, Object>() {{
-        /*
-        CHANGE_ME: YOU MUST ADD HERE THE EXTRAS TIMESERIES DESIRED IN A SECOND POST EVENTS. THIS CAN BE THE SAME TO
-        'TIMESERIES_2_POST' OR NOT. REMEMBER, EACH TIMESERIE NAME HAS TO EXIST IN YOUR OBJECT MODEL DEFINITION AND ITS
-        VALUE HAS TO MATCH ALSO WITH YOUR OBJECT MODEL DEFINITION.
-        YOU CAN ADD ONLY ONE OR MORE THAN ONE ATTRIBUTE AND IT HAS TO BE ADDED AS THE BELOW EXAMPLE WITH A NAME AND A
-        VALUE.
-         */
-        put(" < CHANGE_ME: PUT HERE THE ATTRIBUTE'S NAME > ", " < CHANGE_ME: PUT HERE ITS VALUE > ");
-    }};
-    
-    private final String QUERY = 
-        /*
-        CHANGE_ME: YOU MUST MODIFY HERE THE QUERY SENT TO THE SEARCH API(S)
-        Example: "{ \"from\": \"event\", \"select\": [ {\"value\": \"speed\"} ] }"
-        */
-        "{ CHANGE_ME }";
-
-    MnuboSDKClient client = MnuboSDKFactory.getClient(HOSTNAME, CONSUMER_KEY, CONSUMER_SECRET);
-
-    @Test
-    public void T001_CreateOwner() {
-        try {
-
-            //Owner to be created
-            Owner owner = Owner
-                    .builder()
-                    .withUsername(OWNER_USERNAME)
-                    .withPassword(OWNER_PASSWORD)
-                    .withAttributes(OWNER_ATTRIBUTES)
-                    .build();
-
-            //Posting Owner
-            client.getOwnerClient().create(owner);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
+    @Before
+    public void setUp() throws Exception {
+        if (CONSUMER_KEY == null || CONSUMER_SECRET == null || CLIENT == null) {
+            log.error("Test initialization failed.");
+            throw new IllegalStateException("Test initialization failed.");
         }
     }
 
     @Test
-    public void T005_UpdateOwner() {
+    public void owner() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+        final String username = "username-" + uuid;
+        final String usernameToDelete = "usernameToDelete-" + uuid;
+        final String value = "value-" + uuid;
+
+        assertThat(CLIENT.getOwnerClient().ownerExists(username), equalTo(false));
+
+        final Owner validOwner =
+                Owner.builder()
+                        .withUsername(username)
+                        .withPassword("password-" + uuid)
+                        .withAddedAttribute(OWNER_TEXT_ATTRIBUTE, value)
+                        .build();
+
+        final Owner ownerToDelete =
+                Owner.builder()
+                        .withUsername(usernameToDelete)
+                        .withPassword("password-" + uuid)
+                        .build();
+
+        CLIENT.getOwnerClient().create(ownerToDelete);
+        CLIENT.getOwnerClient().create(validOwner);
+
+        final Owner invalidOwner =
+                Owner.builder()
+                        .withUsername("username-" + UUID.randomUUID())
+                        .withPassword("password-" + UUID.randomUUID())
+                        .withAddedAttribute("unknown", "value")
+                        .build();
         try {
-
-            //Owner to be updated
-            Owner owner = Owner
-                    .builder()
-                    .withAttributes(OWNER_ATTRIBUTES_2_UPDATE)
-                    .build();
-
-            //Putting Owner
-            client.getOwnerClient().update(owner, OWNER_USERNAME);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
+            CLIENT.getOwnerClient().create(invalidOwner);
+            fail("should fail because the payload contain an unknown owner attribute");
+        } catch (HttpStatusCodeException ex) {
+            //expected
         }
-    }
-    
-    @Test
-    public void T007_CreateUpdateOwnersBatch() {
-        try {
-            // Make sure the number of username / password / attributes are the same
-            assertThat(BATCH_OWNER_USERNAME.size(), equalTo(BATCH_OWNER_PASSWORD.size()));
-            assertThat(BATCH_OWNER_USERNAME.size(), equalTo(BATCH_OWNER_ATTRIBUTES.size()));
 
-            List<Owner> owners = new ArrayList<>();
-            
-            // Owners to be created
-            for (int i = 0; i < BATCH_OWNER_USERNAME.size(); i++) {
-                owners.add(Owner.builder()
-                                .withUsername(BATCH_OWNER_USERNAME.get(i))
-                                .withPassword(BATCH_OWNER_PASSWORD.get(i))
-                                .withAttributes(BATCH_OWNER_ATTRIBUTES.get(i))
-                                .build());
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("username"), equalTo(username));
+                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(value));
             }
+        });
 
-            // PUT Batch of Owners
-            List<Result> results = client.getOwnerClient().createUpdate(owners);
+        final String newValue = "newValue";
+        final Owner updatedOwner =
+                Owner.builder()
+                        .withUsername(username)
+                        .withAddedAttribute(OWNER_TEXT_ATTRIBUTE, newValue)
+                        .build();
 
-            assertNotNull("The list of results for owners is NULL", results);
+        CLIENT.getOwnerClient().update(updatedOwner, username);
 
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
-        }
-    }
-
-    @Test
-    public void T010_DeleteOwner() {
-        try {
-
-            //Owner to be created & deleted
-            String userName = "createMeThenDeleteMe";
-
-            Owner owner = Owner
-                    .builder()
-                    .withUsername(userName)
-                    .withPassword(OWNER_PASSWORD)
-                    .build();
-
-            //Posting Owner
-            client.getOwnerClient().create(owner);
-
-            //deleting Owner
-            client.getOwnerClient().delete(userName);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
-        }
-    }
-
-    @Test
-    public void T015_CreateObject() {
-        try {
-
-            //Object to be created
-            SmartObject object = SmartObject
-                    .builder()
-                    .withDeviceId(DEVICE_ID)
-                    .withObjectType(OBJECT_TYPE)
-                    .withAttributes(OBJECT_ATTRIBUTES)
-                    .build();
-
-            //Posting Object
-            client.getObjectClient().create(object);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
-        }
-    }
-
-    @Test
-    public void T020_CreateObjectWithOwner() {
-        try {
-
-            //Owner to be linked
-            Owner owner = Owner
-                    .builder()
-                    .withUsername(OWNER_USERNAME_WITH_OWNER_LINK)
-                    .withPassword(OWNER_PASSWORD)
-                    .build();
-
-            //Posting Owner to be linked, this must be posted before to link it to an object.
-            client.getOwnerClient().create(owner);
-
-            //Object to be created,
-            SmartObject object = SmartObject
-                    .builder()
-                    .withDeviceId(DEVICE_ID_WITH_OWNER_LINK)
-                    .withObjectType(OBJECT_TYPE)
-                    .withAttributes(OBJECT_ATTRIBUTES)
-                    .withOwner(OWNER_USERNAME_WITH_OWNER_LINK)
-                    .build();
-
-            //Posting Object
-            client.getObjectClient().create(object);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
-        }
-    }
-
-    @Test
-    public void T025_UpdateObject() {
-        try {
-
-            //Object to be updated
-            SmartObject object = SmartObject
-                    .builder()
-                    .withAttributes(OBJECT_ATTRIBUTES_2_UPDATE)
-                    .build();
-
-            //Putting Object
-            client.getObjectClient().update(object, DEVICE_ID);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
-        }
-    }
-    
-    @Test
-    public void T027_CreateUpdateObjectsBatch() {
-        try {
-            // Make sure the number of device id / object type / attributes are the same
-            assertThat(BATCH_DEVICE_ID.size(), equalTo(BATCH_OBJECT_TYPE.size()));
-            assertThat(BATCH_DEVICE_ID.size(), equalTo(BATCH_OBJECT_ATTRIBUTES.size()));
-
-            List<SmartObject> objects = new ArrayList<>();
-            
-            // Objects to be created
-            for (int i = 0; i < BATCH_DEVICE_ID.size(); i++) {
-                objects.add(SmartObject.builder()
-                                       .withDeviceId(BATCH_DEVICE_ID.get(i))
-                                       .withObjectType(BATCH_OBJECT_TYPE.get(i))
-                                       .withAttributes(BATCH_OBJECT_ATTRIBUTES.get(i))
-                                       .build());
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("username"), equalTo(username));
+                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(newValue));
             }
+        });
 
-            // PUT Batch of Objects
-            List<Result> results = client.getObjectClient().createUpdate(objects);
+        assertThat(CLIENT.getOwnerClient().ownerExists(username), equalTo(true));
 
-            assertNotNull("The list of results for objects is NULL", results);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
-        }
+        CLIENT.getOwnerClient().delete(ownerToDelete.getUsername());
     }
 
     @Test
-    public void T030_DeleteObject() {
+    public void objects() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+        final String deviceId = "deviceId-" + uuid;
+        final String deviceIdToDelete = "deviceIdToDelete-" + uuid;
+        final String value = "value-" + uuid;
+
+        assertThat(CLIENT.getObjectClient().objectExists(deviceId), equalTo(false));
+        assertThat(
+                CLIENT.getObjectClient().objectsExist(Collections.singletonList(deviceId)),
+                equalTo(Collections.singletonMap(deviceId, false))
+        );
+
+        final SmartObject validObject =
+                SmartObject.builder()
+                        .withDeviceId(deviceId)
+                        .withObjectType(OBJECT_TYPE)
+                        .withAddedAttribute(OBJECT_TEXT_ATTRIBUTE, value)
+                        .build();
+
+        final SmartObject objectToDelete =
+                SmartObject.builder()
+                        .withDeviceId(deviceIdToDelete)
+                        .withObjectType(OBJECT_TYPE)
+                        .build();
+
+        CLIENT.getObjectClient().create(objectToDelete);
+        CLIENT.getObjectClient().create(validObject);
+
+        final SmartObject invalidOwner =
+                SmartObject.builder()
+                        .withDeviceId("deviceId-" + UUID.randomUUID())
+                        .withObjectType(OBJECT_TYPE)
+                        .withAddedAttribute("unknown", "value")
+                        .build();
         try {
-
-            //Object to be created & deleted
-            String deviceId = "createMeThenDeleteMe";
-
-            SmartObject object = SmartObject
-                    .builder()
-                    .withDeviceId(deviceId)
-                    .withObjectType(OBJECT_TYPE)
-                    .build();
-
-            //Posting Owner
-            client.getObjectClient().create(object);
-
-            //deleting Owner
-            client.getObjectClient().delete(deviceId);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
+            CLIENT.getObjectClient().create(invalidOwner);
+        } catch (HttpStatusCodeException ex) {
+            //expected
         }
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId));
+                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(value));
+            }
+        });
+
+        final String newValue = "newValue";
+        final SmartObject updatedObject =
+                SmartObject.builder()
+                        .withDeviceId(deviceId)
+                        .withObjectType(OBJECT_TYPE)
+                        .withAddedAttribute(OBJECT_TEXT_ATTRIBUTE, newValue)
+                        .build();
+
+        CLIENT.getObjectClient().update(updatedObject, deviceId);
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId));
+                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(newValue));
+            }
+        });
+
+        assertThat(CLIENT.getObjectClient().objectExists(deviceId), equalTo(true));
+        assertThat(
+                CLIENT.getObjectClient().objectsExist(Collections.singletonList(deviceId)),
+                equalTo(Collections.singletonMap(deviceId, true))
+        );
+
+        CLIENT.getObjectClient().delete(objectToDelete.getDeviceId());
+
     }
 
     @Test
-    public void T035_OwnerClaimingObject() {
+    public void events() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+        final String deviceId = "deviceId-" + uuid;
+        final SmartObject validObject =
+                SmartObject.builder()
+                        .withDeviceId(deviceId)
+                        .withObjectType(OBJECT_TYPE)
+                        .build();
+        CLIENT.getObjectClient().create(validObject);
+
+
+        final UUID id1 = UUID.randomUUID();
+        final String value1 = "value-" + id1;
+        final Event event1 =
+                Event.builder()
+                        .withEventID(id1)
+                        .withSmartObject(validObject.getDeviceId())
+                        .withEventType(EVENT_TYPE)
+                        .withAddedTimeseries(TS_TEXT_ATTRIBUTE, value1)
+                        .build();
+
+        final UUID id2 = UUID.randomUUID();
+        final String value2 = "value-" + id2;
+        final Event event2 =
+                Event.builder()
+                        .withEventID(id2)
+                        .withSmartObject(validObject.getDeviceId())
+                        .withEventType(EVENT_TYPE)
+                        .withAddedTimeseries(TS_TEXT_ATTRIBUTE, value2)
+                        .build();
+
+        assertThat(CLIENT.getEventClient().eventExists(event1.getEventId()), equalTo(false));
+        assertThat(
+                CLIENT.getEventClient().eventsExist(Collections.singletonList(event1.getEventId())),
+                equalTo(Collections.singletonMap(event1.getEventId(), false))
+        );
+
+        val eventResult = CLIENT.getEventClient().send(event1, event2);
+        assertThat(eventResult.get(0).getResult(), equalTo(Result.ResultStates.success));
+        assertThat(eventResult.get(1).getResult(), equalTo(Result.ResultStates.success));
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_EVENT_WITH_PLACEHOLDER, event1.getEventId()));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("event_id"), equalTo(event1.getEventId().toString()));
+                assertThat(rows.get(0).getString(TS_TEXT_ATTRIBUTE), equalTo(value1));
+
+                val result2 = CLIENT.getSearchClient().search(String.format(SEARCH_EVENT_WITH_PLACEHOLDER, event2.getEventId()));
+                val rows2 = result2.all();
+                assertThat(rows2.size(), equalTo(1));
+                assertThat(rows2.get(0).getString("event_id"), equalTo(event2.getEventId().toString()));
+                assertThat(rows2.get(0).getString(TS_TEXT_ATTRIBUTE), equalTo(value2));
+            }
+        });
+
+        assertThat(CLIENT.getEventClient().eventExists(event1.getEventId()), equalTo(true));
+        assertThat(
+                CLIENT.getEventClient().eventsExist(Collections.singletonList(event1.getEventId())),
+                equalTo(Collections.singletonMap(event1.getEventId(), true))
+        );
+
+    }
+
+    @Test
+    public void batching() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+        final String value1 = "value1";
+        final String value2 = "value2";
+
+        final String username1 = "username-batch1-" + uuid;
+        final String username2 = "username-batch2-" + uuid;
+        final List<Owner> owners = Arrays.asList(
+                Owner.builder()
+                        .withUsername(username1)
+                        .withPassword("password")
+                        .withAddedAttribute(OWNER_TEXT_ATTRIBUTE, value1)
+                        .build(),
+                Owner.builder()
+                        .withUsername(username2)
+                        .withPassword("password")
+                        .withAddedAttribute(OWNER_TEXT_ATTRIBUTE, value2)
+                        .build()
+        );
+        final List<Result> createdOwners = CLIENT.getOwnerClient().createUpdate(owners);
+        assertThat(createdOwners.size(), equalTo(2));
+
+        final String deviceId1 = "deviceId-batch1-" + uuid;
+        final String deviceId2 = "deviceId-batch2-" + uuid;
+        final List<SmartObject> objects = Arrays.asList(
+                SmartObject.builder()
+                        .withDeviceId(deviceId1)
+                        .withObjectType(OBJECT_TYPE)
+                        .withAddedAttribute(OBJECT_TEXT_ATTRIBUTE, value1)
+                        .build(),
+                SmartObject.builder()
+                        .withDeviceId(deviceId2)
+                        .withObjectType(OBJECT_TYPE)
+                        .withAddedAttribute(OBJECT_TEXT_ATTRIBUTE, value2)
+                        .build()
+        );
+        final List<Result> createdObjects = CLIENT.getObjectClient().createUpdate(objects);
+        assertThat(createdObjects.size(), equalTo(2));
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username1));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("username"), equalTo(username1));
+                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(value1));
+            }
+        });
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username2));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("username"), equalTo(username2));
+                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(value2));
+            }
+        });
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId1));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId1));
+                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(value1));
+            }
+        });
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId2));
+                val rows = result.all();
+                assertThat(rows.size(), equalTo(1));
+                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId2));
+                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(value2));
+            }
+        });
+    }
+
+    @Test
+    public void claimAndUnclaim() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+        final String username = "username-" + uuid;
+        final String otherUsername = "otherUsername-" + uuid;
+        final String deviceId = "deviceId-" + uuid;
+
+        final Owner validOwner =
+                Owner.builder()
+                        .withUsername(username)
+                        .withPassword("password-" + uuid)
+                        .build();
+        final Owner validOtherOwner =
+                Owner.builder()
+                        .withUsername(otherUsername)
+                        .withPassword("password-" + uuid)
+                        .build();
+
+        final SmartObject validObject =
+                SmartObject.builder()
+                        .withDeviceId(deviceId)
+                        .withObjectType(OBJECT_TYPE)
+                        .withAddedAttribute(OBJECT_TEXT_ATTRIBUTE, username)
+                        .build();
+
+        CLIENT.getObjectClient().create(validObject);
+        CLIENT.getOwnerClient().create(validOwner);
+        CLIENT.getOwnerClient().create(validOtherOwner);
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId));
+                val objRows = objResult.all();
+                assertThat(objRows.size(), equalTo(1));
+
+                val ownResult = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username));
+                val ownRows = ownResult.all();
+                assertThat(ownRows.size(), equalTo(1));
+            }
+        });
+
         try {
-
-
-            //claiming Owner. Both Object and Owner must have been created before.
-            client.getOwnerClient().claim(OWNER_USERNAME, DEVICE_ID);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
+            CLIENT.getOwnerClient().claim("unknownuser-" + uuid, deviceId);
+            fail("should fail because the username does not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
         }
-    }
-
-    @Test
-    public void T040_PostingOneEvent() {
         try {
-
-            //event to be posted
-            Event event = Event
-                    .builder()
-                    .withEventType(EVENT_TYPE)
-                    .withSmartObject(DEVICE_ID)
-                    .withTimeseries(TIMESERIES_2_POST)
-                    .build();
-
-            //Posting event
-            List<Result> results = client.getEventClient().send(Arrays.asList(event));
-
-            assertNotNull("The list of results for events is NULL", results);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
+            CLIENT.getOwnerClient().claim(username, "unknownDevice-" + uuid);
+            fail("should fail because the device id does not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
         }
-    }
-
-    @Test
-    public void T045_PostingEvents() {
         try {
-
-            //events to be posted
-            Event event1 = Event
-                    .builder()
-                    .withEventType(EVENT_TYPE)
-                    .withSmartObject(DEVICE_ID)
-                    .withTimeseries(TIMESERIES_2_POST)
-                    .build();
-
-            Event event2 = Event
-                    .builder()
-                    .withEventType(EVENT_TYPE)
-                    .withSmartObject(DEVICE_ID)
-                    .withTimeseries(EXTRA_TIMESERIES_2_POST)
-                    .build();
-
-            List<Event> events = new ArrayList<Event>();
-            events.add(event1);
-            events.add(event2);
-
-            //Posting events
-            List<Result> results = client.getEventClient().send(events);
-
-            assertNotNull("The list of results for events is NULL", results);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
+            CLIENT.getOwnerClient().claim("unknownuser-" + uuid, "unknownDevice-" + uuid);
+            fail("should fail because the username and device id do not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
         }
-    }
 
-    @Test
-    public void T050_PostingEventsWithDeviceId() {
+        CLIENT.getOwnerClient().claim(username, deviceId);
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER, username));
+                val objRows = objResult.all();
+                assertThat(objRows.size(), equalTo(1));
+                assertThat(objRows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(username));
+            }
+        });
+
         try {
-
-            //events to be posted
-            Event event1 = Event
-                    .builder()
-                    .withEventType(EVENT_TYPE)
-                    .withTimeseries(TIMESERIES_2_POST)
-                    .build();
-
-            Event event2 = Event
-                    .builder()
-                    .withEventType(EVENT_TYPE)
-                    .withTimeseries(EXTRA_TIMESERIES_2_POST)
-                    .build();
-
-            List<Event> events = new ArrayList<Event>();
-            events.add(event1);
-            events.add(event2);
-
-            //Posting events
-            List<Result> results = client.getEventClient().send(DEVICE_ID, events);
-
-            assertNotNull("The list of results for events is NULL", results);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
+            CLIENT.getOwnerClient().unclaim("unknownuser-" + uuid, deviceId);
+            fail("should fail because the username does not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
         }
-    }
-
-    @Test
-    public void T055_CleanUp() {
-        client.getOwnerClient().delete(OWNER_USERNAME);
-        client.getOwnerClient().delete(OWNER_USERNAME_WITH_OWNER_LINK);
-        for (String batchUsername : BATCH_OWNER_USERNAME) {
-            client.getOwnerClient().delete(batchUsername);
-        }
-        client.getObjectClient().delete(DEVICE_ID);
-        client.getObjectClient().delete(DEVICE_ID_WITH_OWNER_LINK);
-        for (String batchDeviceId : BATCH_DEVICE_ID) {
-            client.getObjectClient().delete(batchDeviceId);
-        }
-    }
-    
-    @Test
-    public void T060_SearchBasic() {
         try {
-            // Perform a Basic Search
-            ResultSet searchResultSet = client.getSearchClient().search(QUERY);
-            
-            assertNotNull("Search Result is NULL", searchResultSet);
-
+            CLIENT.getOwnerClient().unclaim(username, "unknownDevice-" + uuid);
+            fail("should fail because the device id does not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
         }
-        catch (HttpClientErrorException ex) {
-
-            log.error(format("Error code: %s, Error Message: %s", ex.getStatusCode(), ex.getResponseBodyAsString()),
-                    ex);
-            fail();
+        try {
+            CLIENT.getOwnerClient().unclaim("unknownuser-" + uuid, "unknownDevice-" + uuid);
+            fail("should fail because the username and device id do not exist");
+        } catch (HttpStatusCodeException ex) {
+            //expected
         }
-        catch (Exception ex) {
 
-            log.error(format("Error Message: %s", ex.getMessage()), ex);
-            fail();
+        CLIENT.getOwnerClient().unclaim(username, deviceId);
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER, username));
+                val objRows = objResult.all();
+                assertThat(objRows.size(), equalTo(0));
+            }
+        });
+
+        try {
+            CLIENT.getOwnerClient().unclaim(username, deviceId);
+            fail("should fail because the object is already unclaimed");
+        } catch (HttpStatusCodeException ex) {
+            //expected
+        }
+
+    }
+
+    private interface Eventually {
+        void test();
+    }
+
+    private static final class AssertEventually {
+        static long defaultTimeout = 1000 * 240;
+        static long defaultDelay = 5000;
+        public static void that(Eventually eventually) {
+            that(eventually, defaultTimeout, defaultDelay);
+        }
+
+        @SneakyThrows
+        public static void that(Eventually eventually, long timeout, long delay) {
+            long end = System.currentTimeMillis() + timeout;
+            Throwable lastException = null;
+            while (System.currentTimeMillis() < end) {
+                try {
+                    eventually.test();
+                    return; //completed
+                } catch (AssertionError err) {
+                    lastException = err;
+                } catch (Exception ex) {
+                    log.info("an error occurred: ", ex);
+                    fail("eventual assertion threw: " + ex.getMessage());
+                }
+                Thread.sleep(delay);
+            }
+            fail("eventually timed out with this last assertion error: " + (lastException != null ? lastException.getMessage() : "none"));
         }
     }
 
-    @Test
-    public void T065_SearchDataset() {
-        try {
-            // Perform a Basic Search
-            List<DataSet> datasets = client.getSearchClient().getDatasets();
-            
-            assertNotNull(datasets);
-            assertTrue("Dataset size = 0", datasets.size() > 0);
-
-        } catch (HttpClientErrorException ex) {
-
-            log.error(
-                    format(
-                            "Error code: %s, Error Message: %s",
-                            ex.getStatusCode(),
-                            ex.getResponseBodyAsString()
-                    ),
-                    ex
-            );
-            fail();
-        } catch (Exception ex) {
-
-            log.error(format("Error Message: %s",ex.getMessage()), ex);
-            fail();
-        }
+    private static InputStream openResource(String filename) {
+        return SdkClientIntegrationTest.class.getClassLoader().getResourceAsStream(filename);
     }
 }

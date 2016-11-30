@@ -1,0 +1,16 @@
+{
+  "from": "owner",
+  "select": [
+    {
+      "value": "username"
+    },
+    {
+      "value": "owner_text_attribute"
+    }
+  ],
+  "where": {
+    "username": {
+      "eq": "%s"
+    }
+  }
+}
