@@ -1,3 +1,15 @@
+<a name='1.8.1'></a>
+
+# [1.8.1](https://github.com/mnubo/smartobjects-java-client/compare/1.7.7...1.8.1) (2016-11-30)
+
+
+### Features
+
+* **POST /api/v3/owners/{username}/objects/{device}/unclaim**: support for unclaim object
+
+### Breaking changes
+
+* Convert.java which parse result from the mnubo platform would throw an `NumberFormatException` if no type was found. An `IllegalArgumentException` is thrown instead.
 <a name="1.7.7"></a>
 
 # [1.7.7](https://github.com/mnubo/mnubo-java-sdk/compare/v1.7.6...v1.7.7) (2016-07-25)
