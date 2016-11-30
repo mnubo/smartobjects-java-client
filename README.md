@@ -1,3 +1,6 @@
+[![Build status](https://travis-ci.org/mnubo/smartobjects-java-client.svg?branch=master)](https://travis-ci.org/mnubo/smartobjects-java-client.svg?branch=master)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mnubo/java-sdk-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mnubo/java-sdk-client)
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
@@ -42,10 +45,6 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # mnubo Java SDK
-
-
-[![Build status](https://travis-ci.org/mnubo/smartobjects-net-client.svg?branch=master)](https://travis-ci.org/mnubo/smartobjects-java-client.svg?branch=master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mnubo/java-sdk-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mnubo/java-sdk-client)
 
 Introduction
 ============
