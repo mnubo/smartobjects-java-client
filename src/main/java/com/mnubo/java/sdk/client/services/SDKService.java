@@ -29,6 +29,13 @@ class SDKService {
         template.postForEntity(url, request, String.class);
     }
 
+    void postRequest(String url, Object object) {
+        // entity
+        HttpEntity<?> request = new HttpEntity<>(object, buildHeaders());
+
+        template.postForEntity(url, request, String.class);
+    }
+
     <T> T postRequest(String url, Class<T> objectClass, Object object) {
         // entity
         HttpEntity<?> request = new HttpEntity<>(object, buildHeaders());

@@ -47,6 +47,7 @@ public abstract class ObjectMapperConfig {
         module.addDeserializer(Owner.class, new OwnerDeserializer());
         module.addSerializer(new EventSerializer());
         module.addDeserializer(Event.class, new EventDeserializer());
+        module.addSerializer(new ClaimOrUnclaimSerializer());
         return module;
     }
 

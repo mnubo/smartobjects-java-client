@@ -1,5 +1,6 @@
 package integration;
 
+import com.mnubo.java.sdk.client.models.ClaimOrUnclaim;
 import com.mnubo.java.sdk.client.models.Event;
 import com.mnubo.java.sdk.client.models.Owner;
 import com.mnubo.java.sdk.client.models.SmartObject;
@@ -431,26 +432,37 @@ public class SdkClientIntegrationTest {
             }
         });
 
-        try {
-            CLIENT.getOwnerClient().claim("unknownuser-" + uuid, deviceId);
-            fail("should fail because the username does not exist");
-        } catch (HttpStatusCodeException ex) {
-            //expected
-        }
-        try {
-            CLIENT.getOwnerClient().claim(username, "unknownDevice-" + uuid);
-            fail("should fail because the device id does not exist");
-        } catch (HttpStatusCodeException ex) {
-            //expected
-        }
-        try {
-            CLIENT.getOwnerClient().claim("unknownuser-" + uuid, "unknownDevice-" + uuid);
-            fail("should fail because the username and device id do not exist");
-        } catch (HttpStatusCodeException ex) {
-            //expected
-        }
+        final ClaimOrUnclaim unknownUser= new ClaimOrUnclaim("unknownuser-" + uuid, deviceId, null);
+        final ClaimOrUnclaim unknownDevice= new ClaimOrUnclaim(username, "unknownDevice-" + uuid, null);
+        final ClaimOrUnclaim bothUnknown= new ClaimOrUnclaim("unknownuser-" + uuid, "unknownDevice-" + uuid, null);
 
-        CLIENT.getOwnerClient().claim(username, deviceId);
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(unknownUser)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(unknownDevice)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(bothUnknown)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+
+        final ClaimOrUnclaim validClaim = new ClaimOrUnclaim(username, deviceId, null);
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(validClaim)).get(0).getResult(),
+                equalTo(Result.ResultStates.success)
+        );
+        final ClaimOrUnclaim validClaimWithBody = new ClaimOrUnclaim(username, deviceId, Collections.<String, Object>singletonMap("x_timestamp", "2015-01-22T00:01:25-02:00"));
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(validClaimWithBody)).get(0).getResult(),
+                equalTo(Result.ResultStates.success)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.<ClaimOrUnclaim>emptyList()).size(),
+                equalTo(0)
+        );
 
         AssertEventually.that(new Eventually() {
             @Override
@@ -462,26 +474,29 @@ public class SdkClientIntegrationTest {
             }
         });
 
-        try {
-            CLIENT.getOwnerClient().unclaim("unknownuser-" + uuid, deviceId);
-            fail("should fail because the username does not exist");
-        } catch (HttpStatusCodeException ex) {
-            //expected
-        }
-        try {
-            CLIENT.getOwnerClient().unclaim(username, "unknownDevice-" + uuid);
-            fail("should fail because the device id does not exist");
-        } catch (HttpStatusCodeException ex) {
-            //expected
-        }
-        try {
-            CLIENT.getOwnerClient().unclaim("unknownuser-" + uuid, "unknownDevice-" + uuid);
-            fail("should fail because the username and device id do not exist");
-        } catch (HttpStatusCodeException ex) {
-            //expected
-        }
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(unknownUser)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(unknownDevice)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(bothUnknown)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
 
-        CLIENT.getOwnerClient().unclaim(username, deviceId);
+        final ClaimOrUnclaim validUnclaim = new ClaimOrUnclaim(username, deviceId, null);
+        CLIENT.getOwnerClient().batchUnclaim(Collections.<ClaimOrUnclaim>emptyList());
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.<ClaimOrUnclaim>emptyList()).size(),
+                equalTo(0)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(validUnclaim)).get(0).getResult(),
+                equalTo(Result.ResultStates.success)
+        );
 
         AssertEventually.that(new Eventually() {
             @Override
@@ -492,12 +507,138 @@ public class SdkClientIntegrationTest {
             }
         });
 
-        try {
-            CLIENT.getOwnerClient().unclaim(username, deviceId);
-            fail("should fail because the object is already unclaimed");
-        } catch (HttpStatusCodeException ex) {
-            //expected
-        }
+        //should fail because the object is already unclaimed
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(validUnclaim)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+
+
+    }
+
+    @Test
+    public void batchclaimAndUnclaim() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+        final String username = "username-" + uuid;
+        final String otherUsername = "otherUsername-" + uuid;
+        final String deviceId = "deviceId-" + uuid;
+
+        final Owner validOwner =
+                Owner.builder()
+                        .withUsername(username)
+                        .withPassword("password-" + uuid)
+                        .build();
+        final Owner validOtherOwner =
+                Owner.builder()
+                        .withUsername(otherUsername)
+                        .withPassword("password-" + uuid)
+                        .build();
+
+        final SmartObject validObject =
+                SmartObject.builder()
+                        .withDeviceId(deviceId)
+                        .withObjectType(OBJECT_TYPE)
+                        .withAddedAttribute(OBJECT_TEXT_ATTRIBUTE, username)
+                        .build();
+
+        CLIENT.getObjectClient().create(validObject);
+        CLIENT.getOwnerClient().create(validOwner);
+        CLIENT.getOwnerClient().create(validOtherOwner);
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId));
+                val objRows = objResult.all();
+                assertThat(objRows.size(), equalTo(1));
+
+                val ownResult = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username));
+                val ownRows = ownResult.all();
+                assertThat(ownRows.size(), equalTo(1));
+            }
+        });
+
+        final ClaimOrUnclaim unknownUser= new ClaimOrUnclaim("unknownuser-" + uuid, deviceId, null);
+        final ClaimOrUnclaim unknownDevice= new ClaimOrUnclaim(username, "unknownDevice-" + uuid, null);
+        final ClaimOrUnclaim bothUnknown= new ClaimOrUnclaim("unknownuser-" + uuid, "unknownDevice-" + uuid, null);
+
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(unknownUser)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(unknownDevice)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(bothUnknown)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+
+        final ClaimOrUnclaim validClaim = new ClaimOrUnclaim(username, deviceId, null);
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(validClaim)).get(0).getResult(),
+                equalTo(Result.ResultStates.success)
+        );
+        final ClaimOrUnclaim validClaimWithBody = new ClaimOrUnclaim(username, deviceId, Collections.<String, Object>singletonMap("x_timestamp", "2015-01-22T00:01:25-02:00"));
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.singletonList(validClaimWithBody)).get(0).getResult(),
+                equalTo(Result.ResultStates.success)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchClaim(Collections.<ClaimOrUnclaim>emptyList()).size(),
+                equalTo(0)
+        );
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER, username));
+                val objRows = objResult.all();
+                assertThat(objRows.size(), equalTo(1));
+                assertThat(objRows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(username));
+            }
+        });
+
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(unknownUser)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(unknownDevice)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(bothUnknown)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+
+        final ClaimOrUnclaim validUnclaim = new ClaimOrUnclaim(username, deviceId, null);
+        CLIENT.getOwnerClient().batchUnclaim(Collections.<ClaimOrUnclaim>emptyList());
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.<ClaimOrUnclaim>emptyList()).size(),
+                equalTo(0)
+        );
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(validUnclaim)).get(0).getResult(),
+                equalTo(Result.ResultStates.success)
+        );
+
+        AssertEventually.that(new Eventually() {
+            @Override
+            public void test() {
+                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER, username));
+                val objRows = objResult.all();
+                assertThat(objRows.size(), equalTo(0));
+            }
+        });
+
+        //should fail because the object is already unclaimed
+        assertThat(
+                CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(validUnclaim)).get(0).getResult(),
+                equalTo(Result.ResultStates.error)
+        );
+
 
     }
 

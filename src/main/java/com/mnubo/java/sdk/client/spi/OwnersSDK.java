@@ -3,6 +3,7 @@ package com.mnubo.java.sdk.client.spi;
 import java.util.List;
 import java.util.Map;
 
+import com.mnubo.java.sdk.client.models.ClaimOrUnclaim;
 import com.mnubo.java.sdk.client.models.Owner;
 import com.mnubo.java.sdk.client.models.result.Result;
 
@@ -33,6 +34,38 @@ public interface OwnersSDK {
      * @param deviceId, Object's deviceId of the Object to be unclaimed.
      */
     void unclaim(String username, String deviceId);
+
+    /**
+     * Allows an owner claim an Object.
+     *
+     * @param username Owner's username who's claiming the object.
+     * @param deviceId Object's deviceId of the Object claimed.
+     * @param body json attributes for the claim, eg the timestamp.
+     */
+    void claim(String username, String deviceId, Map<String, Object> body);
+
+    /**
+     * Allows an owner unclaim an Object.
+     *
+     * @param username Owner's username who owns the object.
+     * @param deviceId Object's deviceId of the Object to be unclaimed.
+     * @param body json attributes for the claim, eg the timestamp.
+     */
+    void unclaim(String username, String deviceId, Map<String, Object> body);
+
+    /**
+     * Allows batching of claim.
+     *
+     * @param claims List of ClaimOrUnclaim objects
+     */
+    List<Result> batchClaim(List<ClaimOrUnclaim> claims);
+
+    /**
+     * Allows batching of unclaim.
+     *
+     * @param unclaims List of ClaimOrUnclaim objects
+     */
+    List<Result> batchUnclaim(List<ClaimOrUnclaim> unclaims);
 
     /**
      * Allows update an existing owner.
