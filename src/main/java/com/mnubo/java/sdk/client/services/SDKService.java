@@ -114,4 +114,13 @@ class SDKService {
                                    .path(getConfig().getHttpBasePath());
     }
 
+    UriComponentsBuilder getModelBaseUri() {
+        return UriComponentsBuilder.newInstance()
+                .host(getConfig().getHostName())
+                .port(443)
+                .scheme("https")
+                .path(getConfig().getHttpBasePath())
+                .path("/model");
+    }
+
 }

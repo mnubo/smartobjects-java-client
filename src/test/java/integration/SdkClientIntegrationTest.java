@@ -4,6 +4,7 @@ import com.mnubo.java.sdk.client.models.ClaimOrUnclaim;
 import com.mnubo.java.sdk.client.models.Event;
 import com.mnubo.java.sdk.client.models.Owner;
 import com.mnubo.java.sdk.client.models.SmartObject;
+import com.mnubo.java.sdk.client.models.datamodel.Model;
 import com.mnubo.java.sdk.client.models.result.Result;
 import com.mnubo.java.sdk.client.services.MnuboSDKFactory;
 import com.mnubo.java.sdk.client.spi.MnuboSDKClient;
@@ -20,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -640,6 +641,25 @@ public class SdkClientIntegrationTest {
         );
 
 
+    }
+
+    @Test
+    public void exportModel() throws Exception {
+        final Model model = CLIENT.getModelClient().export();
+
+        assertThat(model, is(not(nullValue())));
+
+        assertThat(model.getEventTypes().size(), equalTo(2));
+
+        assertThat(model.getObjectTypes().size(), equalTo(1));
+
+        assertThat(model.getTimeseries().size(), equalTo(2));
+
+        assertThat(model.getObjectAttributes().size(), equalTo(1));
+
+        assertThat(model.getOwnerAttributes().size(), equalTo(1));
+
+        assertThat(model.getSessionizers().size(), equalTo(1));
     }
 
     private interface Eventually {

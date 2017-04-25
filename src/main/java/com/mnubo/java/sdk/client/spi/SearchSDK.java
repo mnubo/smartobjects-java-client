@@ -6,7 +6,7 @@ import com.mnubo.java.sdk.client.models.DataSet;
 import com.mnubo.java.sdk.client.models.result.ResultSet;
 
 /**
- * Owner SDK Client. This interface gives access to Search APIs.
+ * Search SDK Client. This interface gives access to Search APIs.
  */
 public interface SearchSDK {
 
