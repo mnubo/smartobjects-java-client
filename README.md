@@ -21,6 +21,9 @@
   - [Check if an owner exists](#check-if-an-owner-exists)
   - [Check if a batch of owners exist](#check-if-a-batch-of-owners-exist)
   - [Claiming an object](#claiming-an-object)
+  - [Batch claiming](#batch-claiming)
+  - [Unclaiming an object](#unclaiming-an-object)
+  - [Batch unclaiming](#batch-unclaiming)
   - [Creating objects](#creating-objects)
   - [Updating objects](#updating-objects)
   - [Create or update a batch of Objects](#create-or-update-a-batch-of-objects)
@@ -32,6 +35,7 @@
     - [To send multiple events to multiple objects:](#to-send-multiple-events-to-multiple-objects)
   - [Check if an event exists](#check-if-an-event-exists)
   - [Check if a batch of events exist](#check-if-a-batch-of-events-exist)
+  - [Model](#model)
   - [Searching](#searching)
     - [Sending search query](#sending-search-query)
   - [Retrieving datasets](#retrieving-datasets)
@@ -317,15 +321,37 @@ OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 mnuboOwnersClient.claim( "john.smith@mycompany.com", "my_device_Id" );
 ```
 
-Unclaiming an object
+Batch claiming
 ------------------
-This example describes how to link an Object with an Owner:
+This example describes how to link Objects to Owners:
 ```
-//get an Owners client interface
 OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
-//claim the object
+mnuboOwnersClient.batchClaim(Arrays.asList(
+    new ClaimOrUnclaim("john.smith@mycompany.com", "my_device_Id"),
+    new ClaimOrUnclaim("freddy@mycompany.com", "my_device_Id2", Collections.singletonMap("x_timestamp", "2017-04-26T07:38:36+00:00")) 
+));
+```
+
+Unclaiming an object
+------------------
+This example describes how to unlink an Object from an Owner:
+```
+OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
+
 mnuboOwnersClient.unclaim( "john.smith@mycompany.com", "my_device_Id" );
+```
+
+Batch unclaiming
+------------------
+This example describes how to unlink Objects of Owners:
+```
+OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
+
+mnuboOwnersClient.batchUnclaim(Arrays.asList(
+    new ClaimOrUnclaim("john.smith@mycompany.com", "my_device_Id"),
+    new ClaimOrUnclaim("freddy@mycompany.com", "my_device_Id2", Collections.singletonMap("x_timestamp", "2017-04-26T07:38:36+00:00")) 
+));
 ```
 
 Creating objects
@@ -552,7 +578,7 @@ To send events:
 1. Request an OwnersSDK interface from the mnubo client instance.
 2. Build an event.
 
-##### To send multiple events to a single object:
+### To send multiple events to a single object:
 
 ```
 //private String objectID = "mythermostat0301424";
@@ -800,6 +826,19 @@ boolean eventAExists = exists.get(UUID.fromString("22222222-2222-2222-2222-22222
 boolean eventBExists = exists.get(UUID.fromString("11111111-1111-1111-1111-111111111111"))
 ```
 
+Model
+---------
+
+The SDK allows you to retrieve the model in the current zone (production or sandbox).
+
+This example describes how to do so:
+```java
+MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
+Model model = mnuboClient.getModelClient().export();
+```
+
+See [mnubo documentation](https://smartobjects.mnubo.com/apps/doc/api_search.html#get-api-v3-model-export) for more information.
+
 Searching
 ---------
 
@@ -920,7 +959,7 @@ Configuring the example
 - Assign your personal consumer secret to the field 'CONSUMER_SECRET' as: CONSUMER_SECRET = "consumerSecretProvidedByMnubo";
 - Add at least one Owner's attribute to the fields 'OWNER_ATTRIBUTES' and 'OWNER_ATTRIBUTES_2_UPDATE' this can be the sames or not.
 - Add at least one Object's attribute to the fields 'OBJECT_ATTRIBUTES' and 'OBJECT_ATTRIBUTES_2_UPDATE' this can be the sames or not.
-- Add at least one Timeserie to the fields 'TIMESERIES_2_POST' and 'EXTRA_TIMESERIES_2_POST' this can be the sames or not.
+- Add at least one Timeseries to the fields 'TIMESERIES_2_POST' and 'EXTRA_TIMESERIES_2_POST' this can be the sames or not.
 
 
 Running the example
