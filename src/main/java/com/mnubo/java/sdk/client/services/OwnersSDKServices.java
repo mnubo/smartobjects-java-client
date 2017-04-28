@@ -1,6 +1,7 @@
 package com.mnubo.java.sdk.client.services;
 
 import static com.mnubo.java.sdk.client.utils.ValidationUtils.notBlank;
+import static com.mnubo.java.sdk.client.utils.ValidationUtils.notNullNorEmpty;
 import static com.mnubo.java.sdk.client.utils.ValidationUtils.validNotNull;
 import static java.util.Arrays.*;
 
@@ -10,6 +11,7 @@ import java.util.*;
 import com.mnubo.java.sdk.client.mapper.ObjectMapperConfig;
 import com.mnubo.java.sdk.client.mapper.StringExistsResultDeserializer;
 import com.mnubo.java.sdk.client.mapper.UUIDExistsResultDeserializer;
+import com.mnubo.java.sdk.client.models.ClaimOrUnclaim;
 import com.mnubo.java.sdk.client.models.Owner;
 import com.mnubo.java.sdk.client.models.result.Result;
 import com.mnubo.java.sdk.client.spi.OwnersSDK;
@@ -37,6 +39,16 @@ class OwnersSDKServices implements OwnersSDK {
 
     @Override
     public void claim(String username, String deviceId) {
+        claim(username, deviceId, Collections.<String, Object>emptyMap());
+    }
+
+    @Override
+    public void unclaim(String username, String deviceId) {
+        unclaim(username, deviceId, Collections.<String, Object>emptyMap());
+    }
+
+    @Override
+    public void claim(String username, String deviceId, Map<String, Object> body) {
         notBlank(username, "username cannot be blank.");
         notBlank(deviceId, "x_device_id cannot be blank.");
 
@@ -45,11 +57,15 @@ class OwnersSDKServices implements OwnersSDK {
                                             .pathSegment(username, "objects", deviceId, "claim")
                                             .build().toString();
 
-        sdkCommonServices.postRequest(url);
+        if(body == null || body.isEmpty()) {
+            sdkCommonServices.postRequest(url);
+        } else {
+            sdkCommonServices.postRequest(url, body);
+        }
     }
 
     @Override
-    public void unclaim(String username, String deviceId) {
+    public void unclaim(String username, String deviceId, Map<String, Object> body) {
         notBlank(username, "username cannot be blank.");
         notBlank(deviceId, "x_device_id cannot be blank.");
 
@@ -58,7 +74,37 @@ class OwnersSDKServices implements OwnersSDK {
                 .pathSegment(username, "objects", deviceId, "unclaim")
                 .build().toString();
 
-        sdkCommonServices.postRequest(url);
+        if(body == null || body.isEmpty()) {
+            sdkCommonServices.postRequest(url);
+        } else {
+            sdkCommonServices.postRequest(url, body);
+        }
+    }
+
+    @Override
+    public List<Result> batchClaim(List<ClaimOrUnclaim> claims) {
+        validNotNull(claims, "claims list should not be null");
+
+        final String url = sdkCommonServices.getIngestionBaseUri()
+                .path(OWNER_PATH)
+                .pathSegment("claim")
+                .build().toString();
+
+        final Result[] results = sdkCommonServices.postRequest(url, Result[].class, claims);
+        return results == null ? new ArrayList<Result>() : Arrays.asList(results);
+    }
+
+    @Override
+    public List<Result> batchUnclaim(List<ClaimOrUnclaim> unclaims) {
+        validNotNull(unclaims, "unclaims list should not be null");
+
+        final String url = sdkCommonServices.getIngestionBaseUri()
+                .path(OWNER_PATH)
+                .pathSegment("unclaim")
+                .build().toString();
+
+        final Result[] results = sdkCommonServices.postRequest(url, Result[].class, unclaims);
+        return results == null ? new ArrayList<Result>() : Arrays.asList(results);
     }
 
     @Override

@@ -37,4 +37,12 @@ public interface MnuboSDKClient {
      */
     SearchSDK getSearchClient();
 
+    /**
+     * Returns Model Client, giving access to handle mnubo Model API(s).
+     *
+     * @return ModelSDK interface
+     *
+     */
+    ModelSDK getModelClient();
+
 }

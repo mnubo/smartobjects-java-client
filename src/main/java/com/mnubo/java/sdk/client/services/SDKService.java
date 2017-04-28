@@ -29,6 +29,13 @@ class SDKService {
         template.postForEntity(url, request, String.class);
     }
 
+    void postRequest(String url, Object object) {
+        // entity
+        HttpEntity<?> request = new HttpEntity<>(object, buildHeaders());
+
+        template.postForEntity(url, request, String.class);
+    }
+
     <T> T postRequest(String url, Class<T> objectClass, Object object) {
         // entity
         HttpEntity<?> request = new HttpEntity<>(object, buildHeaders());
@@ -105,6 +112,15 @@ class SDKService {
         return UriComponentsBuilder.newInstance().host(getConfig().getHostName())
                                    .port(getConfig().getRestitutionPort()).scheme(getConfig().getHttpProtocol())
                                    .path(getConfig().getHttpBasePath());
+    }
+
+    UriComponentsBuilder getModelBaseUri() {
+        return UriComponentsBuilder.newInstance()
+                .host(getConfig().getHostName())
+                .port(443)
+                .scheme("https")
+                .path(getConfig().getHttpBasePath())
+                .path("/model");
     }
 
 }

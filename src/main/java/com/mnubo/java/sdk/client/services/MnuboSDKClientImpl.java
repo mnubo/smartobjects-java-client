@@ -1,19 +1,16 @@
 package com.mnubo.java.sdk.client.services;
 
+import com.mnubo.java.sdk.client.spi.*;
 import org.springframework.web.client.RestTemplate;
 
 import com.mnubo.java.sdk.client.config.MnuboSDKConfig;
-import com.mnubo.java.sdk.client.spi.EventsSDK;
-import com.mnubo.java.sdk.client.spi.MnuboSDKClient;
-import com.mnubo.java.sdk.client.spi.ObjectsSDK;
-import com.mnubo.java.sdk.client.spi.OwnersSDK;
-import com.mnubo.java.sdk.client.spi.SearchSDK;
 
 final class MnuboSDKClientImpl implements MnuboSDKClient {
     private final ObjectsSDK objectCLient;
     private final OwnersSDK ownerCLient;
     private final EventsSDK eventCLient;
     private final SearchSDK searchCLient;
+    private final ModelSDK modeClient;
     private final SDKService sdkService;
 
     MnuboSDKClientImpl(MnuboSDKConfig config, RestTemplate restTemplate, CredentialHandler credentials) {
@@ -26,6 +23,7 @@ final class MnuboSDKClientImpl implements MnuboSDKClient {
         eventCLient = new EventsSDKServices(sdkService);
         ownerCLient = new OwnersSDKServices(sdkService);
         searchCLient = new SearchSDKServices(sdkService);
+        modeClient = new ModelSDKServices(sdkService);
     }
 
     @Override
@@ -46,6 +44,11 @@ final class MnuboSDKClientImpl implements MnuboSDKClient {
     @Override
     public SearchSDK getSearchClient() {
         return searchCLient;
+    }
+
+    @Override
+    public ModelSDK getModelClient() {
+        return modeClient;
     }
 
     public SDKService getSdkService() {

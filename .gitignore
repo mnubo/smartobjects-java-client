@@ -13,4 +13,4 @@ pom.xml.versionsBackup
 tree*.txt
 ttree*.txt
 config.dump
-application-pascal.properties
+credentials.properties
