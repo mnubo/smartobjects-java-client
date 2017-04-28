@@ -1,5 +1,7 @@
 package com.mnubo.java.sdk.client.models;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mnubo.java.sdk.client.utils.ValidationUtils;
 
 import java.util.Collections;
@@ -35,14 +37,17 @@ public class ClaimOrUnclaim {
         this.attributes = attributes;
     }
 
+    @JsonProperty(USERNAME)
     public String getUsername() {
         return username;
     }
 
+    @JsonProperty(DEVICE_ID)
     public String getDeviceId() {
         return deviceId;
     }
 
+    @JsonAnyGetter
     public Map<String, Object> getAttributes() {
         return attributes;
     }
