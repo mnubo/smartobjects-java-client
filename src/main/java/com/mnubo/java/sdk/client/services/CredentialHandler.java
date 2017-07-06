@@ -59,9 +59,9 @@ class CredentialHandler {
             // send request
             ResponseEntity<Token> response = restTemplate.exchange(url, HttpMethod.POST, request, Token.class);
             notBlank(response.getBody().getAccessToken(),
-                    "Token not valid, check autentication server or credentials");
+                    "Token not valid, check authentication server or credentials");
             notBlank(response.getBody().getTokenType(),
-                    "Token not valid, check autentication server or credentials");
+                    "Token not valid, check authentication server or credentials");
             setCredentials(response.getBody());
             setExpireTime(credentials.getExpiresIn());
         }
