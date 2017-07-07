@@ -36,13 +36,14 @@ public class MnuboSDKConfig {
     private final int httpConnectionRequestTimeout;
     private final int httpSoketTimeout;
     private final String basePath;
+    private final ExponentialBackoffConfig exponentialBackoffConfig;
 
     private MnuboSDKConfig(String hostName, String SecurityConsumerKey, String SecurityConsumerSecret, int platformPort,
                            int restitutionPort, int authenticationPort, String httpProtocol, int httpDefaultTimeout,
                            boolean httpDisableRedirectHandling, String basePath,
                            boolean httpDisableAutomaticRetries, int httpSoketTimeout,
                            int httpMaxTotalConnection, int httpMaxConnectionPerRoute, int httpConnectionTimeout,
-                           int httpConnectionRequestTimeout, boolean httpDisableContentCompression) {
+                           int httpConnectionRequestTimeout, boolean httpDisableContentCompression, ExponentialBackoffConfig exponentialBackoffConfig) {
 
         this.hostName = parseAsString(hostName, HOST_NAME);
         this.SecurityConsumerKey = parseAsString(SecurityConsumerKey, SECURITY_CONSUMER_KEY);
@@ -66,6 +67,7 @@ public class MnuboSDKConfig {
         this.httpDisableContentCompression = parseAsBoolean(Boolean.toString(httpDisableContentCompression), CLIENT_DISABLE_CONTENT_COMPRESSION);
         this.httpConnectionTimeout = parseAsInteger(Integer.toString(httpConnectionTimeout), CLIENT_CONNECT_TIMEOUT);
         this.httpSoketTimeout = parseAsInteger(Integer.toString(httpSoketTimeout), CLIENT_SOCKET_TIMEOUT);
+        this.exponentialBackoffConfig = exponentialBackoffConfig;
     }
 
     public String getHostName() {
@@ -144,6 +146,10 @@ public class MnuboSDKConfig {
         return basePath;
     }
 
+    public ExponentialBackoffConfig getExponentialBackoffConfig() {
+        return exponentialBackoffConfig;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -177,6 +183,7 @@ public class MnuboSDKConfig {
         private int httpConnectionRequestTimeout = DEFAULT_TIMEOUT;
         private int httpSocketTimeout = DEFAULT_TIMEOUT;
         private String basePath = DEFAULT_BASE_PATH;
+        private ExponentialBackoffConfig exponentialBackoffConfig;
 
         public Builder withHostName(String platformServer) {
             this.hostName = parseAsString(platformServer, HOST_NAME);
@@ -267,11 +274,16 @@ public class MnuboSDKConfig {
             return this;
         }
 
+        public Builder withExponentionalBackoffConfig(ExponentialBackoffConfig config) {
+            this.exponentialBackoffConfig = config;
+            return this;
+        }
+
         public MnuboSDKConfig build() {
             return new MnuboSDKConfig(hostName, SecurityConsumerKey, SecurityConsumerSecret, platformPort, restitutionPort,
                     authenticationPort, httpProtocol, httpDefaultTimeout, httpDisableRedirectHandling, basePath,
                     httpDisableAutomaticRetries, httpSocketTimeout, httpMaxTotalConnection, httpMaxConnectionPerRoute,
-                    httpConnectionTimeout, httpConnectionRequestTimeout, httpDisableContentCompression);
+                    httpConnectionTimeout, httpConnectionRequestTimeout, httpDisableContentCompression, exponentialBackoffConfig);
         }
     }
 
