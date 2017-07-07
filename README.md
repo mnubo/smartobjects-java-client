@@ -16,7 +16,6 @@
 - [Usage](#usage)
   - [Getting a "MnuboSDKClient" (client) instance](#getting-a-mnubosdkclient-client-instance)
     - [Basic Configuration](#basic-configuration)
-    - [Advanced Configuration](#advanced-configuration)
   - [Creating owners](#creating-owners)
   - [Updating owners](#updating-owners)
   - [Create or update a batch of Owners](#create-or-update-a-batch-of-owners)
@@ -111,12 +110,11 @@ private final String HOST = "rest.sandbox.mnubo.com";
 private final String CONSUMER_KEY = "your consumer key!!!";
 private final String CONSUMER_SECRET = "your consumer SECRET!!!";
 
-//Obtain a client instance using default values.
+//Obtain a client instance using default values. (w/o exponentional backoff strategy)
 MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
+MnuboSDKClient mnuboClientWithBackoff = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET, new ExponentialBackoffConfig());
 ```
 
-### Advanced Configuration
-Using this method you configure mandatory and optional parameters in a properties file. If you wish to use this method please contact mnubo.
 
 Creating owners
 ---------------
