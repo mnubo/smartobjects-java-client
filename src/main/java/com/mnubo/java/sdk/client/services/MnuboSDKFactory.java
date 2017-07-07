@@ -96,6 +96,7 @@ public abstract class MnuboSDKFactory {
      *
      */
     //@formatter:on
+    @Deprecated
     public static MnuboSDKClient getAdvanceClient(Properties properties) {
         MnuboSDKConfig.Builder configBuilder = MnuboSDKConfig.builder();
 
@@ -184,6 +185,7 @@ public abstract class MnuboSDKFactory {
      *
      */
     //@formatter:on
+    @Deprecated
     public static MnuboSDKClient getAdvanceClient(InputStream config) throws IOException {
         validNotNull(config, "configuration streaming instance");
         Properties properties = new Properties();
@@ -220,6 +222,7 @@ public abstract class MnuboSDKFactory {
      *
      */
     //@formatter:on
+    @Deprecated
     public static MnuboSDKClient getAdvanceClient(File configFile) throws IOException {
         validIsFile(configFile);
         FileInputStream config = new FileInputStream(configFile);
