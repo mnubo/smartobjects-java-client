@@ -121,17 +121,6 @@ public class SdkClientIntegrationTest {
             //expected
         }
 
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username));
-                val rows = result.all();
-                assertThat(rows.size(), equalTo(1));
-                assertThat(rows.get(0).getString("username"), equalTo(username));
-                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(value));
-            }
-        });
-
         final String newValue = "newValue";
         final Owner updatedOwner =
                 Owner.builder()
@@ -140,17 +129,6 @@ public class SdkClientIntegrationTest {
                         .build();
 
         CLIENT.getOwnerClient().update(updatedOwner, username);
-
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username));
-                val rows = result.all();
-                assertThat(rows.size(), equalTo(1));
-                assertThat(rows.get(0).getString("username"), equalTo(username));
-                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(newValue));
-            }
-        });
 
         assertThat(CLIENT.getOwnerClient().ownerExists(username), equalTo(true));
 
@@ -198,17 +176,6 @@ public class SdkClientIntegrationTest {
             //expected
         }
 
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId));
-                val rows = result.all();
-                assertThat(rows.size(), equalTo(1));
-                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId));
-                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(value));
-            }
-        });
-
         final String newValue = "newValue";
         final SmartObject updatedObject =
                 SmartObject.builder()
@@ -218,17 +185,6 @@ public class SdkClientIntegrationTest {
                         .build();
 
         CLIENT.getObjectClient().update(updatedObject, deviceId);
-
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId));
-                val rows = result.all();
-                assertThat(rows.size(), equalTo(1));
-                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId));
-                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(newValue));
-            }
-        });
 
         assertThat(CLIENT.getObjectClient().objectExists(deviceId), equalTo(true));
         assertThat(
@@ -282,23 +238,6 @@ public class SdkClientIntegrationTest {
         assertThat(eventResult.get(0).getResult(), equalTo(Result.ResultStates.success));
         assertThat(eventResult.get(1).getResult(), equalTo(Result.ResultStates.success));
 
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val result = CLIENT.getSearchClient().search(String.format(SEARCH_EVENT_WITH_PLACEHOLDER, event1.getEventId()));
-                val rows = result.all();
-                assertThat(rows.size(), equalTo(1));
-                assertThat(rows.get(0).getString("event_id"), equalTo(event1.getEventId().toString()));
-                assertThat(rows.get(0).getString(TS_TEXT_ATTRIBUTE), equalTo(value1));
-
-                val result2 = CLIENT.getSearchClient().search(String.format(SEARCH_EVENT_WITH_PLACEHOLDER, event2.getEventId()));
-                val rows2 = result2.all();
-                assertThat(rows2.size(), equalTo(1));
-                assertThat(rows2.get(0).getString("event_id"), equalTo(event2.getEventId().toString()));
-                assertThat(rows2.get(0).getString(TS_TEXT_ATTRIBUTE), equalTo(value2));
-            }
-        });
-
         assertThat(CLIENT.getEventClient().eventExists(event1.getEventId()), equalTo(true));
         assertThat(
                 CLIENT.getEventClient().eventsExist(Collections.singletonList(event1.getEventId())),
@@ -346,49 +285,6 @@ public class SdkClientIntegrationTest {
         );
         final List<Result> createdObjects = CLIENT.getObjectClient().createUpdate(objects);
         assertThat(createdObjects.size(), equalTo(2));
-
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username1));
-                val rows = result.all();
-                assertThat(rows.size(), equalTo(1));
-                assertThat(rows.get(0).getString("username"), equalTo(username1));
-                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(value1));
-            }
-        });
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username2));
-                val rows = result.all();
-                assertThat(rows.size(), equalTo(1));
-                assertThat(rows.get(0).getString("username"), equalTo(username2));
-                assertThat(rows.get(0).getString(OWNER_TEXT_ATTRIBUTE), equalTo(value2));
-            }
-        });
-
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId1));
-                val rows = result.all();
-                assertThat(rows.size(), equalTo(1));
-                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId1));
-                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(value1));
-            }
-        });
-
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val result = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId2));
-                val rows = result.all();
-                assertThat(rows.size(), equalTo(1));
-                assertThat(rows.get(0).getString("x_device_id"), equalTo(deviceId2));
-                assertThat(rows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(value2));
-            }
-        });
     }
 
     @Test
@@ -465,16 +361,6 @@ public class SdkClientIntegrationTest {
                 equalTo(0)
         );
 
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER, username));
-                val objRows = objResult.all();
-                assertThat(objRows.size(), equalTo(1));
-                assertThat(objRows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(username));
-            }
-        });
-
         assertThat(
                 CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(unknownUser)).get(0).getResult(),
                 equalTo(Result.ResultStates.error)
@@ -498,15 +384,6 @@ public class SdkClientIntegrationTest {
                 CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(validUnclaim)).get(0).getResult(),
                 equalTo(Result.ResultStates.success)
         );
-
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER, username));
-                val objRows = objResult.all();
-                assertThat(objRows.size(), equalTo(0));
-            }
-        });
 
         //should fail because the object is already unclaimed
         assertThat(
@@ -546,19 +423,6 @@ public class SdkClientIntegrationTest {
         CLIENT.getOwnerClient().create(validOwner);
         CLIENT.getOwnerClient().create(validOtherOwner);
 
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId));
-                val objRows = objResult.all();
-                assertThat(objRows.size(), equalTo(1));
-
-                val ownResult = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username));
-                val ownRows = ownResult.all();
-                assertThat(ownRows.size(), equalTo(1));
-            }
-        });
-
         final ClaimOrUnclaim unknownUser= new ClaimOrUnclaim("unknownuser-" + uuid, deviceId, null);
         final ClaimOrUnclaim unknownDevice= new ClaimOrUnclaim(username, "unknownDevice-" + uuid, null);
         final ClaimOrUnclaim bothUnknown= new ClaimOrUnclaim("unknownuser-" + uuid, "unknownDevice-" + uuid, null);
@@ -591,15 +455,6 @@ public class SdkClientIntegrationTest {
                 equalTo(0)
         );
 
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER, username));
-                val objRows = objResult.all();
-                assertThat(objRows.size(), equalTo(1));
-                assertThat(objRows.get(0).getString(OBJECT_TEXT_ATTRIBUTE), equalTo(username));
-            }
-        });
 
         assertThat(
                 CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(unknownUser)).get(0).getResult(),
@@ -624,15 +479,6 @@ public class SdkClientIntegrationTest {
                 CLIENT.getOwnerClient().batchUnclaim(Collections.singletonList(validUnclaim)).get(0).getResult(),
                 equalTo(Result.ResultStates.success)
         );
-
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER, username));
-                val objRows = objResult.all();
-                assertThat(objRows.size(), equalTo(0));
-            }
-        });
 
         //should fail because the object is already unclaimed
         assertThat(
