@@ -95,7 +95,7 @@ public class SdkClientIntegrationTest {
         final Owner validOwner =
                 Owner.builder()
                         .withUsername(username)
-                        .withPassword("password-" + uuid)
+                        .withPassword("rpasswod-" + uuid)
                         .withAddedAttribute(OWNER_TEXT_ATTRIBUTE, value)
                         .build();
 
