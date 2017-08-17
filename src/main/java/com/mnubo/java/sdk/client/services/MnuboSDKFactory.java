@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.mnubo.java.sdk.client.config.ExponentialBackoffConfig;
 import org.springframework.web.client.RestTemplate;
 
 import com.mnubo.java.sdk.client.config.MnuboSDKConfig;
@@ -49,6 +50,10 @@ public abstract class MnuboSDKFactory {
      */
     //@formatter:on
     public static MnuboSDKClient getClient(String hostName, String securityConsumerKey, String securityConsumerSecret) {
+        return getClient(hostName, securityConsumerKey, securityConsumerSecret, null);
+    }
+
+    public static MnuboSDKClient getClient(String hostName, String securityConsumerKey, String securityConsumerSecret, ExponentialBackoffConfig exponentialBackoffConfig) {
         MnuboSDKConfig.Builder configBuilder = MnuboSDKConfig.builder();
 
         notBlank(hostName, "hostname property cannot be empty or null.");
@@ -58,6 +63,7 @@ public abstract class MnuboSDKFactory {
         configBuilder.withHostName(hostName);
         configBuilder.withSecurityConsumerKey(securityConsumerKey);
         configBuilder.withSecurityConsumerSecret(securityConsumerSecret);
+        configBuilder.withExponentionalBackoffConfig(exponentialBackoffConfig);
 
         return generateClients(configBuilder.build());
     }
@@ -90,6 +96,7 @@ public abstract class MnuboSDKFactory {
      *
      */
     //@formatter:on
+    @Deprecated
     public static MnuboSDKClient getAdvanceClient(Properties properties) {
         MnuboSDKConfig.Builder configBuilder = MnuboSDKConfig.builder();
 
@@ -178,6 +185,7 @@ public abstract class MnuboSDKFactory {
      *
      */
     //@formatter:on
+    @Deprecated
     public static MnuboSDKClient getAdvanceClient(InputStream config) throws IOException {
         validNotNull(config, "configuration streaming instance");
         Properties properties = new Properties();
@@ -214,6 +222,7 @@ public abstract class MnuboSDKFactory {
      *
      */
     //@formatter:on
+    @Deprecated
     public static MnuboSDKClient getAdvanceClient(File configFile) throws IOException {
         validIsFile(configFile);
         FileInputStream config = new FileInputStream(configFile);
