@@ -1,11 +1,7 @@
 package com.mnubo.java.sdk.client.config;
 
 import static com.mnubo.java.sdk.client.Constants.*;
-import static com.mnubo.java.sdk.client.utils.ValidationUtils.parseAsBoolean;
-import static com.mnubo.java.sdk.client.utils.ValidationUtils.parseAsHttpProtocol;
-import static com.mnubo.java.sdk.client.utils.ValidationUtils.parseAsInteger;
-import static com.mnubo.java.sdk.client.utils.ValidationUtils.parseAsPort;
-import static com.mnubo.java.sdk.client.utils.ValidationUtils.parseAsString;
+import static com.mnubo.java.sdk.client.utils.ValidationUtils.*;
 
 public class MnuboSDKConfig {
 
@@ -16,8 +12,8 @@ public class MnuboSDKConfig {
 
     // mandatory variables
     private final String hostName;
-    private final String SecurityConsumerKey;
-    private final String SecurityConsumerSecret;
+    private final String securityConsumerKey;
+    private final String securityConsumerSecret;
     // optional variables
     private final int platformPort;
     private final int restitutionPort;
@@ -34,20 +30,20 @@ public class MnuboSDKConfig {
     private final int httpDefaultTimeout;
     private final int httpConnectionTimeout;
     private final int httpConnectionRequestTimeout;
-    private final int httpSoketTimeout;
-    private final String basePath;
+    private final int httpSocketTimeout;
+    private final String httpBasePath;
     private final ExponentialBackoffConfig exponentialBackoffConfig;
 
-    private MnuboSDKConfig(String hostName, String SecurityConsumerKey, String SecurityConsumerSecret, int platformPort,
+    private MnuboSDKConfig(String hostName, String securityConsumerKey, String securityConsumerSecret, int platformPort,
                            int restitutionPort, int authenticationPort, String httpProtocol, int httpDefaultTimeout,
-                           boolean httpDisableRedirectHandling, String basePath,
-                           boolean httpDisableAutomaticRetries, int httpSoketTimeout,
+                           boolean httpDisableRedirectHandling, String httpBasePath,
+                           boolean httpDisableAutomaticRetries, int httpSocketTimeout,
                            int httpMaxTotalConnection, int httpMaxConnectionPerRoute, int httpConnectionTimeout,
                            int httpConnectionRequestTimeout, boolean httpDisableContentCompression, ExponentialBackoffConfig exponentialBackoffConfig) {
 
         this.hostName = parseAsString(hostName, HOST_NAME);
-        this.SecurityConsumerKey = parseAsString(SecurityConsumerKey, SECURITY_CONSUMER_KEY);
-        this.SecurityConsumerSecret = parseAsString(SecurityConsumerSecret, SECURITY_CONSUMER_SECRET);
+        this.securityConsumerKey = parseAsString(securityConsumerKey, SECURITY_CONSUMER_KEY);
+        this.securityConsumerSecret = parseAsString(securityConsumerSecret, SECURITY_CONSUMER_SECRET);
         this.platformPort = parseAsPort(Integer.toString(platformPort), INGESTION_PORT);
         this.restitutionPort = parseAsPort(Integer.toString(restitutionPort), RESTITUTION_PORT);
         this.authenticationPort = parseAsPort(Integer.toString(authenticationPort), AUTHENTICATION_PORT);
@@ -55,7 +51,7 @@ public class MnuboSDKConfig {
         this.httpDefaultTimeout = parseAsInteger(Integer.toString(httpDefaultTimeout), CLIENT_DEFAULT_TIMEOUT);
         this.httpDisableRedirectHandling = parseAsBoolean(Boolean.toString(httpDisableRedirectHandling),
                 CLIENT_DISABLE_REDIRECT_HANDLING);
-        this.basePath = parseAsString(basePath, CLIENT_BASE_PATH);
+        this.httpBasePath = parseAsString(httpBasePath, CLIENT_BASE_PATH);
         this.httpDisableAutomaticRetries = parseAsBoolean(Boolean.toString(httpDisableAutomaticRetries),
                 CLIENT_DISABLE_AUTOMATIC_RETRIES);
         this.httpMaxTotalConnection = parseAsInteger(Integer.toString(httpMaxTotalConnection),
@@ -66,7 +62,7 @@ public class MnuboSDKConfig {
                 CLIENT_MAX_CONNECTIONS_PER_ROUTE);
         this.httpDisableContentCompression = parseAsBoolean(Boolean.toString(httpDisableContentCompression), CLIENT_DISABLE_CONTENT_COMPRESSION);
         this.httpConnectionTimeout = parseAsInteger(Integer.toString(httpConnectionTimeout), CLIENT_CONNECT_TIMEOUT);
-        this.httpSoketTimeout = parseAsInteger(Integer.toString(httpSoketTimeout), CLIENT_SOCKET_TIMEOUT);
+        this.httpSocketTimeout = parseAsInteger(Integer.toString(httpSocketTimeout), CLIENT_SOCKET_TIMEOUT);
         this.exponentialBackoffConfig = exponentialBackoffConfig;
     }
 
@@ -87,11 +83,11 @@ public class MnuboSDKConfig {
     }
 
     public String getSecurityConsumerKey() {
-        return SecurityConsumerKey;
+        return securityConsumerKey;
     }
 
     public String getSecurityConsumerSecret() {
-        return SecurityConsumerSecret;
+        return securityConsumerSecret;
     }
 
     public String getScope() {
@@ -134,8 +130,20 @@ public class MnuboSDKConfig {
         return httpConnectionRequestTimeout;
     }
 
+    /**
+     * @see com.mnubo.java.sdk.client.config.MnuboSDKConfig#getHttpSocketTimeout()
+     */
+    @Deprecated
     public int getHttpSoketTimeout() {
-        return httpSoketTimeout;
+        return httpSocketTimeout;
+    }
+
+    public int getHttpSocketTimeout() {
+        return httpSocketTimeout;
+    }
+
+    public int getHttpConnectionTimeout() {
+        return httpConnectionTimeout;
     }
 
     public int getHttpMaxTotalConnection() {
@@ -143,7 +151,7 @@ public class MnuboSDKConfig {
     }
 
     public String getHttpBasePath() {
-        return basePath;
+        return httpBasePath;
     }
 
     public ExponentialBackoffConfig getExponentialBackoffConfig() {

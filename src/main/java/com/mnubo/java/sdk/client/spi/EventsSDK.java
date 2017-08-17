@@ -15,8 +15,8 @@ public interface EventsSDK {
     /**
      * Allows post events to an unique object. Note that in this case all Event.
      *
-     * @param deviceId, device Id to send the events
-     * @param events, list the events to be posted.
+     * @param deviceId device Id to send the events
+     * @param events list the events to be posted.
      * 
      * @return the list of result for all the events with corresponding id, status and
      * message.
@@ -27,7 +27,7 @@ public interface EventsSDK {
      * Allows post events to several objects. In this case, the device id is taken
      * directly from each event. Thus, a post will be sent by each event in the list.
      *
-     * @param events, list the events to be posted.
+     * @param events list the events to be posted.
      * 
      * @return the list of result for all the events with corresponding id, status and
      * message.
@@ -36,8 +36,6 @@ public interface EventsSDK {
 
     /**
      * @see EventsSDK#send(List)
-     * @param events
-     * @return
      */
     List<Result> send(Event... events);
 

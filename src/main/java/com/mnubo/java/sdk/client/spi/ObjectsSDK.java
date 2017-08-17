@@ -47,8 +47,6 @@ public interface ObjectsSDK {
 
     /**
      * @see ObjectsSDK#createUpdate(List)
-     * @param objects
-     * @return
      */
     List<Result> createUpdate(SmartObject... objects);
 

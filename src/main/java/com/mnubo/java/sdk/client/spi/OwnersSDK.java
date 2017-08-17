@@ -15,23 +15,23 @@ public interface OwnersSDK {
     /**
      * Allows create owners.
      *
-     * @param owner, Owner bean to be created.
+     * @param owner Owner bean to be created.
      */
     void create(Owner owner);
 
     /**
      * Allows an owner claim an Object.
      *
-     * @param username, Owner's username who's claiming the object.
-     * @param deviceId, Object's deviceId of the Object claimed.
+     * @param username Owner's username who's claiming the object.
+     * @param deviceId Object's deviceId of the Object claimed.
      */
     void claim(String username, String deviceId);
 
     /**
      * Allows an owner unclaim an Object.
      *
-     * @param username, Owner's username who owns the object.
-     * @param deviceId, Object's deviceId of the Object to be unclaimed.
+     * @param username Owner's username who owns the object.
+     * @param deviceId Object's deviceId of the Object to be unclaimed.
      */
     void unclaim(String username, String deviceId);
 
@@ -57,6 +57,7 @@ public interface OwnersSDK {
      * Allows batching of claim.
      *
      * @param claims List of ClaimOrUnclaim objects
+     * @return a list with a result for each ClaimOrUnclaim object
      */
     List<Result> batchClaim(List<ClaimOrUnclaim> claims);
 
@@ -64,15 +65,15 @@ public interface OwnersSDK {
      * Allows batching of unclaim.
      *
      * @param unclaims List of ClaimOrUnclaim objects
+     * @return a list with a result for each ClaimOrUnclaim object
      */
     List<Result> batchUnclaim(List<ClaimOrUnclaim> unclaims);
 
     /**
      * Allows update an existing owner.
      *
-     * @param owner, Owner bean to be updated. note that "username" and "password" fields will be ignored.
-     * @param username, Owner's "username" to be updated.
-     *
+     * @param owner Owner to be updated. Note: "username" and "password" fields will be ignored.
+     * @param username Owner's "username" to be updated.
      */
     void update(Owner owner, String username);
 
@@ -96,8 +97,6 @@ public interface OwnersSDK {
 
     /**
      * @see OwnersSDK#createUpdate(List)
-     * @param owners
-     * @return
      */
     List<Result> createUpdate(Owner... owners);
 

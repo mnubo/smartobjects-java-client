@@ -43,7 +43,9 @@ public class Constants {
     public static final String TOKEN_GRANT_TYPE_VALUE = "client_credentials";
     public static final String TOKEN_SCOPE = "scope";
 
+    @Deprecated
     public static final long FLETCHING_TOKEN_MILISEC = 5000;
+    public static final long FETCHING_TOKEN_MS = 5000;
 
     public static final String PRINT_OBJECT_NULL = "";
 
