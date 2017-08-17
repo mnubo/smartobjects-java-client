@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 public class SearchSDKServicesTest {
     private static String HOST = "host";
     private static RestTemplate restTemplate = mock(RestTemplate.class);
-    private static CredentialHandler credentials = mock(CredentialHandler.class);
+    private static ClientSecretCredentialHandler credentials = mock(ClientSecretCredentialHandler.class);
     private static MnuboSDKConfig config = MnuboSDKConfig.builder().withHostName(HOST).withSecurityConsumerKey("CK")
             .withSecurityConsumerSecret("SC").build();
     private static MnuboSDKClientImpl client = new MnuboSDKClientImpl(config, restTemplate, credentials);

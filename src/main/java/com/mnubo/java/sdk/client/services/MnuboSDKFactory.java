@@ -1,9 +1,7 @@
 package com.mnubo.java.sdk.client.services;
 
 import static com.mnubo.java.sdk.client.Constants.*;
-import static com.mnubo.java.sdk.client.utils.ValidationUtils.notBlank;
-import static com.mnubo.java.sdk.client.utils.ValidationUtils.validIsFile;
-import static com.mnubo.java.sdk.client.utils.ValidationUtils.validNotNull;
+import static com.mnubo.java.sdk.client.utils.ValidationUtils.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +10,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import com.mnubo.java.sdk.client.config.ExponentialBackoffConfig;
+import com.mnubo.java.sdk.client.utils.ValidationUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.mnubo.java.sdk.client.config.MnuboSDKConfig;
@@ -52,6 +51,25 @@ public abstract class MnuboSDKFactory {
     public static MnuboSDKClient getClient(String hostName, String securityConsumerKey, String securityConsumerSecret) {
         return getClient(hostName, securityConsumerKey, securityConsumerSecret, null);
     }
+
+
+    public static MnuboSDKClient getClientWithToken(String hostName, String token) {
+        return getClientWithToken(hostName, token, null);
+    }
+
+    public static MnuboSDKClient getClientWithToken(String hostName, String token, ExponentialBackoffConfig exponentialBackoffConfig) {
+        MnuboSDKConfig.Builder configBuilder = MnuboSDKConfig.builder();
+
+        notBlank(hostName, "hostname property cannot be empty or null.");
+        notBlank(token, "token property cannot be empty or null.");
+
+        configBuilder.withHostName(hostName);
+        configBuilder.withToken(token);
+        configBuilder.withExponentionalBackoffConfig(exponentialBackoffConfig);
+
+        return generateClients(configBuilder.build());
+    }
+
 
     public static MnuboSDKClient getClient(String hostName, String securityConsumerKey, String securityConsumerSecret, ExponentialBackoffConfig exponentialBackoffConfig) {
         MnuboSDKConfig.Builder configBuilder = MnuboSDKConfig.builder();
@@ -235,7 +253,14 @@ public abstract class MnuboSDKFactory {
         RestTemplate restTemplate = new HttpRestTemplate(config).getRestTemplate();
 
         // credential handler
-        CredentialHandler credentials = new CredentialHandler(config, restTemplate);
+        CredentialHandler credentials;
+        if (!isBlank(config.getToken())) {
+            credentials = new StaticCredentialHandler(config.getToken());
+        } else if (!isBlank(config.getSecurityConsumerKey()) && !isBlank(config.getSecurityConsumerSecret())) {
+            credentials = new ClientSecretCredentialHandler(config, restTemplate);
+        } else {
+            throw new IllegalArgumentException("You either need a consumer key and consumer secret or a token to initialize");
+        }
 
         return new MnuboSDKClientImpl(config, restTemplate, credentials);
     }

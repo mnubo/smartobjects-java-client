@@ -19,13 +19,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.mnubo.java.sdk.client.config.MnuboSDKConfig;
 
-class CredentialHandler {
+class ClientSecretCredentialHandler implements CredentialHandler {
     private MnuboSDKConfig config;
     private Token credentials;
     private RestTemplate restTemplate;
     private DateTime expireTime;
 
-    CredentialHandler(MnuboSDKConfig aConfig, RestTemplate template) {
+    ClientSecretCredentialHandler(MnuboSDKConfig aConfig, RestTemplate template) {
         config = aConfig;
         restTemplate = template;
         requestToken();
@@ -72,7 +72,7 @@ class CredentialHandler {
         }
     }
 
-    String getAutorizationToken() {
+    public String getAutorizationToken() {
         if (DateTime.now().getMillis() + FETCHING_TOKEN_MS > expireTime.getMillis()) {
             requestToken();
         }

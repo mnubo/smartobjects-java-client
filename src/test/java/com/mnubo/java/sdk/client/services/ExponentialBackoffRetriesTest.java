@@ -172,7 +172,7 @@ public class ExponentialBackoffRetriesTest {
 
 
         final RestTemplate restTemplate = new HttpRestTemplate(config).getRestTemplate();
-        final CredentialHandler credentials = new CredentialHandler(config, restTemplate);
+        final ClientSecretCredentialHandler credentials = new ClientSecretCredentialHandler(config, restTemplate);
         final SDKService sdkService = new SDKService(restTemplate, credentials, config);
         return sdkService;
     }

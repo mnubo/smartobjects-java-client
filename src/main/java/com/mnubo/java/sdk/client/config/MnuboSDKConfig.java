@@ -12,8 +12,12 @@ public class MnuboSDKConfig {
 
     // mandatory variables
     private final String hostName;
+
+    // client and secret or token are valid
     private final String securityConsumerKey;
     private final String securityConsumerSecret;
+    private final String token;
+
     // optional variables
     private final int platformPort;
     private final int restitutionPort;
@@ -34,7 +38,7 @@ public class MnuboSDKConfig {
     private final String httpBasePath;
     private final ExponentialBackoffConfig exponentialBackoffConfig;
 
-    private MnuboSDKConfig(String hostName, String securityConsumerKey, String securityConsumerSecret, int platformPort,
+    private MnuboSDKConfig(String hostName, String securityConsumerKey, String securityConsumerSecret, String token, int platformPort,
                            int restitutionPort, int authenticationPort, String httpProtocol, int httpDefaultTimeout,
                            boolean httpDisableRedirectHandling, String httpBasePath,
                            boolean httpDisableAutomaticRetries, int httpSocketTimeout,
@@ -42,8 +46,9 @@ public class MnuboSDKConfig {
                            int httpConnectionRequestTimeout, boolean httpDisableContentCompression, ExponentialBackoffConfig exponentialBackoffConfig) {
 
         this.hostName = parseAsString(hostName, HOST_NAME);
-        this.securityConsumerKey = parseAsString(securityConsumerKey, SECURITY_CONSUMER_KEY);
-        this.securityConsumerSecret = parseAsString(securityConsumerSecret, SECURITY_CONSUMER_SECRET);
+        this.securityConsumerKey = securityConsumerKey;
+        this.securityConsumerSecret = securityConsumerSecret;
+        this.token = token;
         this.platformPort = parseAsPort(Integer.toString(platformPort), INGESTION_PORT);
         this.restitutionPort = parseAsPort(Integer.toString(restitutionPort), RESTITUTION_PORT);
         this.authenticationPort = parseAsPort(Integer.toString(authenticationPort), AUTHENTICATION_PORT);
@@ -162,6 +167,10 @@ public class MnuboSDKConfig {
         return new Builder();
     }
 
+    public String getToken() {
+        return token;
+    }
+
     public static class Builder {
         // default values
         public final static int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 200;
@@ -175,8 +184,9 @@ public class MnuboSDKConfig {
         public final static boolean DEFAULT_DISABLE_CONTENT_COMPRESSION = false;
 
         private String hostName;
-        private String SecurityConsumerKey;
-        private String SecurityConsumerSecret;
+        private String securityConsumerKey;
+        private String securityConsumerSecret;
+        private String token;
         private int platformPort = DEFAULT_HOST_PORT;
         private int restitutionPort = DEFAULT_HOST_PORT;
         private int authenticationPort = DEFAULT_HOST_PORT;
@@ -214,12 +224,18 @@ public class MnuboSDKConfig {
         }
 
         public Builder withSecurityConsumerKey(String securityConsumerkey) {
-            this.SecurityConsumerKey = parseAsString(securityConsumerkey, SECURITY_CONSUMER_KEY);
+            this.securityConsumerKey = parseAsString(securityConsumerkey, SECURITY_CONSUMER_KEY);
             return this;
         }
 
         public Builder withSecurityConsumerSecret(String securityConsumerSecret) {
-            this.SecurityConsumerSecret = parseAsString(securityConsumerSecret, SECURITY_CONSUMER_SECRET);
+            this.securityConsumerSecret = parseAsString(securityConsumerSecret, SECURITY_CONSUMER_SECRET);
+            return this;
+        }
+
+        public Builder withToken(String token) {
+            notBlank(token, "The token should not be empty");
+            this.token = token;
             return this;
         }
 
@@ -288,7 +304,7 @@ public class MnuboSDKConfig {
         }
 
         public MnuboSDKConfig build() {
-            return new MnuboSDKConfig(hostName, SecurityConsumerKey, SecurityConsumerSecret, platformPort, restitutionPort,
+            return new MnuboSDKConfig(hostName, securityConsumerKey, securityConsumerSecret, token, platformPort, restitutionPort,
                     authenticationPort, httpProtocol, httpDefaultTimeout, httpDisableRedirectHandling, basePath,
                     httpDisableAutomaticRetries, httpSocketTimeout, httpMaxTotalConnection, httpMaxConnectionPerRoute,
                     httpConnectionTimeout, httpConnectionRequestTimeout, httpDisableContentCompression, exponentialBackoffConfig);
