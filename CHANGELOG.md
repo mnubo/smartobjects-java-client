@@ -1,3 +1,9 @@
+<a name='1.10.0'></a>
+
+# [1.10.0](https://github.com/mnubo/smartobjects-java-client/compare/1.9.0...1.10.0) (2017-08-17)
+
+
+* Opt-in exponential backoff retry mechanism
 <a name='1.9.0'></a>
 
 # [1.9.0](https://github.com/mnubo/smartobjects-java-client/compare/1.8.1...1.9.0) (2017-04-28)
