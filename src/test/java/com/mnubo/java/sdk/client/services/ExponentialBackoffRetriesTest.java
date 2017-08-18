@@ -1,6 +1,5 @@
 package com.mnubo.java.sdk.client.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mnubo.java.sdk.client.Consumer;
 import com.mnubo.java.sdk.client.LocalRestServer;
 import com.mnubo.java.sdk.client.config.ExponentialBackoffConfig;
@@ -10,9 +9,7 @@ import lombok.SneakyThrows;
 import org.hamcrest.CoreMatchers;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.restlet.Response;
 import org.restlet.Restlet;
 import org.restlet.data.MediaType;
@@ -23,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.TestCase.fail;
@@ -176,7 +172,7 @@ public class ExponentialBackoffRetriesTest {
 
 
         final RestTemplate restTemplate = new HttpRestTemplate(config).getRestTemplate();
-        final CredentialHandler credentials = new CredentialHandler(config, restTemplate);
+        final ClientSecretCredentialHandler credentials = new ClientSecretCredentialHandler(config, restTemplate);
         final SDKService sdkService = new SDKService(restTemplate, credentials, config);
         return sdkService;
     }

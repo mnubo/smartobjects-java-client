@@ -44,7 +44,7 @@ public class MnuboSDKClientTest {
     private MnuboSDKClientImpl client;
     private MnuboSDKConfig config;
     private final RestTemplate restTemplate = mock(RestTemplate.class);
-    private final CredentialHandler credentials = mock(CredentialHandler.class);
+    private final ClientSecretCredentialHandler credentials = mock(ClientSecretCredentialHandler.class);
 
     private enum PropertyType {
         TEXT,

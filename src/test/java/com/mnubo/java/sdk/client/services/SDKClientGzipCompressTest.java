@@ -100,7 +100,7 @@ public class SDKClientGzipCompressTest {
             .build();
 
     private static final RestTemplate restTemplate = new HttpRestTemplate(config).getRestTemplate();
-    private static final CredentialHandler credentials = new CredentialHandler(config, restTemplate);
+    private static final ClientSecretCredentialHandler credentials = new ClientSecretCredentialHandler(config, restTemplate);
     private static final SDKService sdkService = new SDKService(restTemplate, credentials, config);
 
     @AfterClass
@@ -137,7 +137,7 @@ public class SDKClientGzipCompressTest {
                 .withHttpDisableContentCompression("false")
                 .build();
         RestTemplate restTemplate = new HttpRestTemplate(compressedConfig).getRestTemplate();
-        CredentialHandler credentials = new CredentialHandler(compressedConfig, restTemplate);
+        ClientSecretCredentialHandler credentials = new ClientSecretCredentialHandler(compressedConfig, restTemplate);
         SDKService sdkService = new SDKService(restTemplate, credentials, compressedConfig);
 
         List<Event> events = new ArrayList<Event>() {{
@@ -168,7 +168,7 @@ public class SDKClientGzipCompressTest {
                 .withHttpDisableContentCompression("true")
                 .build();
         RestTemplate restTemplate = new HttpRestTemplate(uncompressedConfig).getRestTemplate();
-        CredentialHandler credentials = new CredentialHandler(uncompressedConfig, restTemplate);
+        ClientSecretCredentialHandler credentials = new ClientSecretCredentialHandler(uncompressedConfig, restTemplate);
         SDKService sdkService = new SDKService(restTemplate, credentials, uncompressedConfig);
 
         List<Event> events = new ArrayList<Event>() {{

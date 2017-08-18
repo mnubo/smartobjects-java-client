@@ -11,6 +11,7 @@ public interface ModelSDK {
      * Exports the model in the current zone. The current zone is determined by the configuration you use:
      *  - sandbox url, consumer key and consumer secret fetch the sandbox model
      *  - production url, consumer key and consumer secret fetch the production model
+     *  @return a representation of the model in the current zone
      */
     Model export();
 

@@ -15,7 +15,8 @@
     - [Configuration](#configuration)
 - [Usage](#usage)
   - [Getting a "MnuboSDKClient" (client) instance](#getting-a-mnubosdkclient-client-instance)
-    - [Basic Configuration](#basic-configuration)
+    - [Configuration with client/secret](#configuration-with-clientsecret)
+    - [Configuration with a static token](#configuration-with-a-static-token)
   - [Creating owners](#creating-owners)
   - [Updating owners](#updating-owners)
   - [Create or update a batch of Owners](#create-or-update-a-batch-of-owners)
@@ -97,24 +98,43 @@ Getting a "MnuboSDKClient" (client) instance
 --------------------------------------------
 To get a client instance use the **"MnuboSDKFactory" Class**. Note that you only need one client instance. We provide multithread support and a pool of connections.
 
-There are two ways to obtain a client instance:
+There are different ways to obtain a client instance:
 
-### Basic Configuration
-Using the basic method, three mandatory parameters are required – Host, consumer key and consumer secret. Please see the example below:
+### Configuration with client/secret
+Using this method, three parameters are required:
 
+* host 
+* consumer key
+* consumer secret
 
 ```
 //Example:
 //Configure constants
 private final String HOST = "rest.sandbox.mnubo.com";
-private final String CONSUMER_KEY = "your consumer key!!!";
-private final String CONSUMER_SECRET = "your consumer SECRET!!!";
+private final String CONSUMER_KEY = "your consumer key";
+private final String CONSUMER_SECRET = "your consumer secret";
 
 //Obtain a client instance using default values. (w/o exponentional backoff strategy)
 MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
 MnuboSDKClient mnuboClientWithBackoff = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET, new ExponentialBackoffConfig());
 ```
 
+### Configuration with a static token
+It is not recommended to use this method in production because your token has an expiry date and this method will not refresh it automatically. Two parameters are required:
+
+* host 
+* token
+
+```
+//Example:
+//Configure constants
+private final String HOST = "rest.sandbox.mnubo.com";
+private final String TOKEN = "your token";
+
+//Obtain a client instance using default values. (w/o exponentional backoff strategy)
+MnuboSDKClient mnuboClient = MnuboSDKFactory.getClientWithToken( HOST , TOKEN);
+MnuboSDKClient mnuboClientWithBackoff = MnuboSDKFactory.getClientWithToken( HOST , TOKEN, new ExponentialBackoffConfig());
+```
 
 Creating owners
 ---------------

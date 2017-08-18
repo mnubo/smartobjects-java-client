@@ -152,7 +152,7 @@ public class ObjectsSDKServicesTest {
             .withHttpProtocol("http")
             .build();
     private static final RestTemplate restTemplate = new HttpRestTemplate(config).getRestTemplate();
-    private static final CredentialHandler credentials = new CredentialHandler(config, restTemplate);
+    private static final ClientSecretCredentialHandler credentials = new ClientSecretCredentialHandler(config, restTemplate);
     private static final SDKService sdkService = new SDKService(restTemplate, credentials, config);
     private static final ObjectsSDK objectsClient = new ObjectsSDKServices(sdkService);
 
