@@ -1,3 +1,9 @@
+<a name='1.11.0'></a>
+
+# [1.11.0](https://github.com/mnubo/smartobjects-java-client/compare/1.10.0...1.11.0) (2017-08-18)
+
+
+* Support initialization with a static access token.
 <a name='1.10.0'></a>
 
 # [1.10.0](https://github.com/mnubo/smartobjects-java-client/compare/1.9.0...1.10.0) (2017-08-17)
