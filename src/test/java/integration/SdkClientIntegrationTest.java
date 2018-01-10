@@ -41,11 +41,6 @@ public class SdkClientIntegrationTest {
     private static MnuboSDKClient CLIENT;
 
 
-    private static String SEARCH_OWNER_WITH_PLACEHOLDER;
-    private static String SEARCH_OBJECT_WITH_PLACEHOLDER;
-    private static String SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER;
-    private static String SEARCH_EVENT_WITH_PLACEHOLDER;
-
     static {
         try (InputStream input = openResource("credentials.properties")) {
             final Properties props = new Properties();
@@ -54,21 +49,6 @@ public class SdkClientIntegrationTest {
             CONSUMER_KEY = props.getProperty("consumer.key");
             CONSUMER_SECRET = props.getProperty("consumer.secret");
             CLIENT = MnuboSDKFactory.getClient(HOSTNAME, CONSUMER_KEY, CONSUMER_SECRET);
-        } catch (IOException e) {
-            System.out.println("TEST INIT FAILED");
-            e.printStackTrace();
-        }
-
-        try (
-                InputStream searchOwnerInput = openResource("search_owner.json");
-                InputStream searchObjectInput = openResource("search_object.json");
-                InputStream searchObjectByOwnerInput = openResource("search_object_by_owner.json");
-                InputStream searchEventInput = openResource("search_event.json")
-        ) {
-            SEARCH_OWNER_WITH_PLACEHOLDER = IOUtils.toString(searchOwnerInput);
-            SEARCH_OBJECT_WITH_PLACEHOLDER = IOUtils.toString(searchObjectInput);
-            SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER = IOUtils.toString(searchObjectByOwnerInput);
-            SEARCH_EVENT_WITH_PLACEHOLDER = IOUtils.toString(searchEventInput);
         } catch (IOException e) {
             System.out.println("TEST INIT FAILED");
             e.printStackTrace();
@@ -316,19 +296,6 @@ public class SdkClientIntegrationTest {
         CLIENT.getOwnerClient().create(validOwner);
         CLIENT.getOwnerClient().create(validOtherOwner);
 
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId));
-                val objRows = objResult.all();
-                assertThat(objRows.size(), equalTo(1));
-
-                val ownResult = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username));
-                val ownRows = ownResult.all();
-                assertThat(ownRows.size(), equalTo(1));
-            }
-        });
-
         final ClaimOrUnclaim unknownUser= new ClaimOrUnclaim("unknownuser-" + uuid, deviceId, null);
         final ClaimOrUnclaim unknownDevice= new ClaimOrUnclaim(username, "unknownDevice-" + uuid, null);
         final ClaimOrUnclaim bothUnknown= new ClaimOrUnclaim("unknownuser-" + uuid, "unknownDevice-" + uuid, null);
@@ -506,37 +473,6 @@ public class SdkClientIntegrationTest {
         assertThat(model.getOwnerAttributes().size(), equalTo(1));
 
         assertThat(model.getSessionizers().size(), equalTo(1));
-    }
-
-    private interface Eventually {
-        void test();
-    }
-
-    private static final class AssertEventually {
-        static long defaultTimeout = 1000 * 240;
-        static long defaultDelay = 5000;
-        public static void that(Eventually eventually) {
-            that(eventually, defaultTimeout, defaultDelay);
-        }
-
-        @SneakyThrows
-        public static void that(Eventually eventually, long timeout, long delay) {
-            long end = System.currentTimeMillis() + timeout;
-            Throwable lastException = null;
-            while (System.currentTimeMillis() < end) {
-                try {
-                    eventually.test();
-                    return; //completed
-                } catch (AssertionError err) {
-                    lastException = err;
-                } catch (Exception ex) {
-                    log.info("an error occurred: ", ex);
-                    fail("eventual assertion threw: " + ex.getMessage());
-                }
-                Thread.sleep(delay);
-            }
-            fail("eventually timed out with this last assertion error: " + (lastException != null ? lastException.getMessage() : "none"));
-        }
     }
 
     private static InputStream openResource(String filename) {
