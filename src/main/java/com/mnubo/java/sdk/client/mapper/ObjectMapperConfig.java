@@ -4,7 +4,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static com.fasterxml.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 
-import com.mnubo.java.sdk.client.models.datamodel.Model;
+import com.mnubo.java.sdk.client.models.datamodel.*;
 import org.joda.time.Interval;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 
@@ -48,6 +48,16 @@ public abstract class ObjectMapperConfig {
         module.addDeserializer(Owner.class, new OwnerDeserializer());
         module.addSerializer(new EventSerializer());
         module.addDeserializer(Event.class, new EventDeserializer());
+        module.addDeserializer(Timeseries.class, new TimeseriesDeserializer());
+        module.addSerializer(new TimeseriesSerializer());
+        module.addDeserializer(ObjectAttribute.class, new ObjectAttributeDeserializer());
+        module.addSerializer(new ObjectAttributeSerializer());
+        module.addDeserializer(OwnerAttribute.class, new OwnerAttributeDeserializer());
+        module.addSerializer(new OwnerAttributeSerializer());
+        module.addDeserializer(ObjectType.class, new ObjectTypeDeserializer());
+        module.addSerializer(new ObjectTypeSerializer());
+        module.addDeserializer(EventType.class, new EventTypeDeserializer());
+        module.addSerializer(new EventTypeSerializer());
         module.addDeserializer(Model.class, new ModelDeserializer());
         return module;
     }

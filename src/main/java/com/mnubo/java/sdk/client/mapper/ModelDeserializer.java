@@ -120,15 +120,7 @@ public class ModelDeserializer extends StdDeserializer<Model> {
 
         if (ownerAttributesNode != null) {
             for (JsonNode rawOwner : ownerAttributesNode) {
-                final String key = rawOwner.get("key").asText();
-                final String displayName = rawOwner.get("displayName").asText();
-                final String description = rawOwner.get("description").asText();
-
-                final JsonNode type = rawOwner.get("type");
-                final String highLevelType = type.get("highLevelType").asText();
-                final String containerType = type.get("containerType").asText();
-
-                ownerAttributes.add(new OwnerAttribute( key, displayName, description, highLevelType, containerType));
+                ownerAttributes.add(OwnerAttributeDeserializer.fromNode(rawOwner));
             }
         }
 
@@ -144,29 +136,21 @@ public class ModelDeserializer extends StdDeserializer<Model> {
         if (eventTypesNode != null) {
             for (JsonNode rawEt : eventTypesNode) {
                 final String key = rawEt.get("key").asText();
-                final String description = rawEt.get("description").asText();
-                final String origin = rawEt.get("origin").asText();
 
                 Set<String> timeseriesKeys = new HashSet<>();
                 final JsonNode timeseriesNode = rawEt.get("timeseries");
                 if(timeseriesNode != null) {
                     for (JsonNode rawTs : timeseriesNode) {
-                        final String tsKey = rawTs.get("key").asText();
-                        final String tsDisplayName = rawTs.get("displayName").asText();
-                        final String tsDescription = rawTs.get("description").asText();
-
-                        final String tsHighLevelType = rawTs.get("type").get("highLevelType").asText();
-
-                        final Timeseries ts = new Timeseries(
-                                tsKey, tsDisplayName, tsDescription, tsHighLevelType, new HashSet<>(Collections.singletonList(key))
-                        );
+                        final Timeseries ts = TimeseriesDeserializer.fromNode(rawTs, new HashSet<String>() {{
+                            add(key);
+                        }});
 
                         allTimeseries.put(new TypeKeyPair(key, ts.getKey()), ts);
                         timeseriesKeys.add(ts.getKey());
                     }
                 }
 
-                eventTypes.add(new EventType(key, description, origin, timeseriesKeys));
+                eventTypes.add(EventTypeDeserializer.fromNode(rawEt, timeseriesKeys));
             }
         }
 
@@ -192,42 +176,32 @@ public class ModelDeserializer extends StdDeserializer<Model> {
         if (objectTypesRootNode != null) {
             for (JsonNode rawOt : objectTypesRootNode) {
                 final String key = rawOt.get("key").asText();
-                final String description = rawOt.get("description").asText();
 
                 Set<String> objectAttributeKeys = new HashSet<>();
                 final JsonNode objectAttributesNode = rawOt.get("objectAttributes");
                 if(objectAttributesNode != null) {
                     for (JsonNode rawObj : objectAttributesNode) {
-                        final String objKey = rawObj.get("key").asText();
-                        final String objDisplayName = rawObj.get("displayName").asText();
-                        final String objDescription = rawObj.get("description").asText();
-
-                        final JsonNode type = rawObj.get("type");
-                        final String objHighLevelType = type.get("highLevelType").asText();
-                        final String objContainerType = type.get("containerType").asText();
-
-                        final ObjectAttribute obj = new ObjectAttribute(
-                                objKey, objDisplayName, objDescription, objHighLevelType,
-                                objContainerType, new HashSet<>(Collections.singletonList(key))
-                        );
+                        final ObjectAttribute obj = ObjectAttributeDeserializer.fromNode(rawObj, new HashSet<String>() {{
+                            add(key);
+                        }});
 
                         allObjectAttribute.put(new TypeKeyPair(key, obj.getKey()), obj);
                         objectAttributeKeys.add(obj.getKey());
                     }
                 }
 
-                objectTypes.add(new ObjectType(key, description, objectAttributeKeys));
+                objectTypes.add(ObjectTypeDeserializer.fromNode(rawOt, objectAttributeKeys));
             }
         }
 
 
-        for (Map.Entry<TypeKeyPair, ObjectAttribute> typeKeyPairObjectAttributeEntry : allObjectAttribute.entrySet()) {
-            final String typeKey = typeKeyPairObjectAttributeEntry.getKey().typeKey;
-            final String key = typeKeyPairObjectAttributeEntry.getKey().key;
+        for (Map.Entry<TypeKeyPair, ObjectAttribute> entry : allObjectAttribute.entrySet()) {
+            final String typeKey = entry.getKey().typeKey;
+            final String key = entry.getKey().key;
 
             final ObjectAttribute exists = objectAttributeByKey.get(key);
             if(exists == null) {
-                objectAttributeByKey.put(key, typeKeyPairObjectAttributeEntry.getValue());
+                objectAttributeByKey.put(key, entry.getValue());
             } else {
                 exists.getObjectTypeKeys().add(typeKey);
             }
