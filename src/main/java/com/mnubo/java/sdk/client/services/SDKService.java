@@ -2,6 +2,7 @@ package com.mnubo.java.sdk.client.services;
 
 import com.mnubo.java.sdk.client.config.ExponentialBackoffConfig;
 import com.mnubo.java.sdk.client.config.MnuboSDKConfig;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
@@ -50,7 +51,7 @@ class SDKService {
         possiblyRetry(new ToCall<Void>() {
             @Override
             public Void run() {
-                template.postForEntity(url, request, String.class);
+                template.postForEntity(url, request, Void.class);
                 return null;
             }
         });
@@ -63,6 +64,22 @@ class SDKService {
             @Override
             public T run() {
                 return template.postForObject(url, request, objectClass);
+            }
+        });
+    }
+
+    <T> T postRequest(final String url, final ParameterizedTypeReference<T> type, final Object object) {
+        final HttpEntity<?> request = new HttpEntity<>(object, buildHeaders());
+
+        return possiblyRetry(new ToCall<T>() {
+            @Override
+            public T run() {
+                final ResponseEntity<T> response = template.exchange(url, HttpMethod.POST, request, type);
+                if (response == null) {
+                    return null;
+                } else {
+                    return response.getBody();
+                }
             }
         });
     }
@@ -102,6 +119,22 @@ class SDKService {
             @Override
             public T run() {
                 final ResponseEntity<T> response = template.exchange(url, HttpMethod.GET, request, objectClass);
+                if (response == null) {
+                    return null;
+                } else {
+                    return response.getBody();
+                }
+            }
+        });
+    }
+
+    <T> T getRequest(final String url, final ParameterizedTypeReference<T> type) {
+        final HttpEntity<?> request = new HttpEntity<Object>(buildHeaders());
+
+        return possiblyRetry(new ToCall<T>() {
+            @Override
+            public T run() {
+                final ResponseEntity<T> response = template.exchange(url, HttpMethod.GET, request, type);
                 if (response == null) {
                     return null;
                 } else {
