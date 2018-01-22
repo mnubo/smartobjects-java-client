@@ -44,4 +44,13 @@ public class ObjectType {
         result = 31 * result + objectAttributeKeys.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "ObjectType{" +
+                "key='" + key + '\'' +
+                ", description='" + description + '\'' +
+                ", objectAttributeKeys=" + objectAttributeKeys +
+                '}';
+    }
 }

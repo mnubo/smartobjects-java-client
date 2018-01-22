@@ -4,13 +4,12 @@ import com.mnubo.java.sdk.client.models.ClaimOrUnclaim;
 import com.mnubo.java.sdk.client.models.Event;
 import com.mnubo.java.sdk.client.models.Owner;
 import com.mnubo.java.sdk.client.models.SmartObject;
-import com.mnubo.java.sdk.client.models.datamodel.Model;
+import com.mnubo.java.sdk.client.models.datamodel.*;
 import com.mnubo.java.sdk.client.models.result.Result;
 import com.mnubo.java.sdk.client.services.MnuboSDKFactory;
 import com.mnubo.java.sdk.client.spi.MnuboSDKClient;
-import lombok.SneakyThrows;
+import com.mnubo.java.sdk.client.spi.ModelSDK;
 import lombok.val;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -23,6 +22,7 @@ import java.util.*;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.fail;
 
 public class SdkClientIntegrationTest {
@@ -41,11 +41,6 @@ public class SdkClientIntegrationTest {
     private static MnuboSDKClient CLIENT;
 
 
-    private static String SEARCH_OWNER_WITH_PLACEHOLDER;
-    private static String SEARCH_OBJECT_WITH_PLACEHOLDER;
-    private static String SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER;
-    private static String SEARCH_EVENT_WITH_PLACEHOLDER;
-
     static {
         try (InputStream input = openResource("credentials.properties")) {
             final Properties props = new Properties();
@@ -58,25 +53,10 @@ public class SdkClientIntegrationTest {
             System.out.println("TEST INIT FAILED");
             e.printStackTrace();
         }
-
-        try (
-                InputStream searchOwnerInput = openResource("search_owner.json");
-                InputStream searchObjectInput = openResource("search_object.json");
-                InputStream searchObjectByOwnerInput = openResource("search_object_by_owner.json");
-                InputStream searchEventInput = openResource("search_event.json")
-        ) {
-            SEARCH_OWNER_WITH_PLACEHOLDER = IOUtils.toString(searchOwnerInput);
-            SEARCH_OBJECT_WITH_PLACEHOLDER = IOUtils.toString(searchObjectInput);
-            SEARCH_OBJECT_BY_OWNER_WITH_PLACEHOLDER = IOUtils.toString(searchObjectByOwnerInput);
-            SEARCH_EVENT_WITH_PLACEHOLDER = IOUtils.toString(searchEventInput);
-        } catch (IOException e) {
-            System.out.println("TEST INIT FAILED");
-            e.printStackTrace();
-        }
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         if (CONSUMER_KEY == null || CONSUMER_SECRET == null || CLIENT == null) {
             log.error("Test initialization failed.");
             throw new IllegalStateException("Test initialization failed.");
@@ -84,7 +64,7 @@ public class SdkClientIntegrationTest {
     }
 
     @Test
-    public void owner() throws Exception {
+    public void owner() {
         final UUID uuid = UUID.randomUUID();
         final String username = "username-" + uuid;
         final String usernameToDelete = "usernameToDelete-" + uuid;
@@ -136,7 +116,7 @@ public class SdkClientIntegrationTest {
     }
 
     @Test
-    public void objects() throws Exception {
+    public void objects() {
         final UUID uuid = UUID.randomUUID();
         final String deviceId = "deviceId-" + uuid;
         final String deviceIdToDelete = "deviceIdToDelete-" + uuid;
@@ -197,7 +177,7 @@ public class SdkClientIntegrationTest {
     }
 
     @Test
-    public void events() throws Exception {
+    public void events() {
         final UUID uuid = UUID.randomUUID();
         final String deviceId = "deviceId-" + uuid;
         final SmartObject validObject =
@@ -247,7 +227,7 @@ public class SdkClientIntegrationTest {
     }
 
     @Test
-    public void batching() throws Exception {
+    public void batching() {
         final UUID uuid = UUID.randomUUID();
         final String value1 = "value1";
         final String value2 = "value2";
@@ -288,7 +268,7 @@ public class SdkClientIntegrationTest {
     }
 
     @Test
-    public void claimAndUnclaim() throws Exception {
+    public void claimAndUnclaim() {
         final UUID uuid = UUID.randomUUID();
         final String username = "username-" + uuid;
         final String otherUsername = "otherUsername-" + uuid;
@@ -315,19 +295,6 @@ public class SdkClientIntegrationTest {
         CLIENT.getObjectClient().create(validObject);
         CLIENT.getOwnerClient().create(validOwner);
         CLIENT.getOwnerClient().create(validOtherOwner);
-
-        AssertEventually.that(new Eventually() {
-            @Override
-            public void test() {
-                val objResult = CLIENT.getSearchClient().search(String.format(SEARCH_OBJECT_WITH_PLACEHOLDER, deviceId));
-                val objRows = objResult.all();
-                assertThat(objRows.size(), equalTo(1));
-
-                val ownResult = CLIENT.getSearchClient().search(String.format(SEARCH_OWNER_WITH_PLACEHOLDER, username));
-                val ownRows = ownResult.all();
-                assertThat(ownRows.size(), equalTo(1));
-            }
-        });
 
         final ClaimOrUnclaim unknownUser= new ClaimOrUnclaim("unknownuser-" + uuid, deviceId, null);
         final ClaimOrUnclaim unknownDevice= new ClaimOrUnclaim(username, "unknownDevice-" + uuid, null);
@@ -395,7 +362,7 @@ public class SdkClientIntegrationTest {
     }
 
     @Test
-    public void batchclaimAndUnclaim() throws Exception {
+    public void batchclaimAndUnclaim() {
         final UUID uuid = UUID.randomUUID();
         final String username = "username-" + uuid;
         final String otherUsername = "otherUsername-" + uuid;
@@ -490,53 +457,84 @@ public class SdkClientIntegrationTest {
     }
 
     @Test
-    public void exportModel() throws Exception {
+    public void exportModel() {
         final Model model = CLIENT.getModelClient().export();
 
         assertThat(model, is(not(nullValue())));
 
-        assertThat(model.getEventTypes().size(), equalTo(2));
+        assertThat(model.getEventTypes().size(), is(greaterThan(2)));
 
-        assertThat(model.getObjectTypes().size(), equalTo(1));
+        assertThat(model.getObjectTypes().size(), is(greaterThan(1)));
 
-        assertThat(model.getTimeseries().size(), equalTo(2));
+        assertThat(model.getTimeseries().size(), is(greaterThan(2)));
 
-        assertThat(model.getObjectAttributes().size(), equalTo(1));
+        assertThat(model.getObjectAttributes().size(), is(greaterThan(1)));
 
-        assertThat(model.getOwnerAttributes().size(), equalTo(1));
+        assertThat(model.getOwnerAttributes().size(), is(greaterThan(1)));
 
-        assertThat(model.getSessionizers().size(), equalTo(1));
+        assertThat(model.getSessionizers().size(), is(equalTo(1)));
     }
 
-    private interface Eventually {
-        void test();
+    @Test
+    public void testGetTimeseries() {
+        val tss = CLIENT.getModelClient().getTimeseries();
+        assertThat(tss.size(), is(greaterThan(3)));
     }
 
-    private static final class AssertEventually {
-        static long defaultTimeout = 1000 * 240;
-        static long defaultDelay = 5000;
-        public static void that(Eventually eventually) {
-            that(eventually, defaultTimeout, defaultDelay);
-        }
+    @Test
+    public void testGetObjectAttributes() {
+        Set<ObjectAttribute> objs = CLIENT.getModelClient().getObjectAttributes();
+        assertThat(objs.size(), is(greaterThan(2)));
+    }
 
-        @SneakyThrows
-        public static void that(Eventually eventually, long timeout, long delay) {
-            long end = System.currentTimeMillis() + timeout;
-            Throwable lastException = null;
-            while (System.currentTimeMillis() < end) {
-                try {
-                    eventually.test();
-                    return; //completed
-                } catch (AssertionError err) {
-                    lastException = err;
-                } catch (Exception ex) {
-                    log.info("an error occurred: ", ex);
-                    fail("eventual assertion threw: " + ex.getMessage());
-                }
-                Thread.sleep(delay);
-            }
-            fail("eventually timed out with this last assertion error: " + (lastException != null ? lastException.getMessage() : "none"));
-        }
+    @Test
+    public void testGetOwnerAttributes() {
+        Set<OwnerAttribute> owners = CLIENT.getModelClient().getOwnerAttributes();
+        assertThat(owners.size(), is(greaterThan(1)));
+    }
+
+    @Test
+    public void testGetObjectTypes() {
+        Set<ObjectType> objectTypes = CLIENT.getModelClient().getObjectTypes();
+        assertThat(objectTypes.size(), is(greaterThan(1)));
+    }
+
+    @Test
+    public void testGetEventTypes() {
+        Set<EventType> eventTypes = CLIENT.getModelClient().getEventTypes();
+        assertThat(eventTypes.size(), is(greaterThan(2)));
+    }
+
+    @Test
+    public void testSandboxOps() {
+        //we can't reset in it test, all sdk its'' tests use the same namespace
+        // CLIENT.getModelClient().sandboxOps().resetOps().reset();
+
+        String genKey = UUID.randomUUID().toString().replace("-", "");
+        EventType et = new EventType(genKey, "desc", "scheduled", Collections.<String>emptySet());
+        CLIENT.getModelClient().sandboxOps().eventTypesOps().createOne(et);
+
+        ObjectType ot = new ObjectType(genKey, "desc", Collections.<String>emptySet());
+        CLIENT.getModelClient().sandboxOps().objectTypesOps().createOne(ot);
+
+        Timeseries ts = new Timeseries(genKey + "-ts", "dp", "desc", "TEXT", Collections.singleton(et.getKey()));
+        CLIENT.getModelClient().sandboxOps().timeseriesOps().createOne(ts);
+        CLIENT.getModelClient().sandboxOps().timeseriesOps().update(ts.getKey(), new ModelSDK.UpdateEntity("new dp", "new desc"));
+        CLIENT.getModelClient().sandboxOps().timeseriesOps().deploy(ts.getKey());
+
+        ObjectAttribute obj = new ObjectAttribute(genKey + "-object", "dp", "desc", "DOUBLE", "none", Collections.singleton(ot.getKey()));
+        CLIENT.getModelClient().sandboxOps().objectAttributesOps().createOne(obj);
+        CLIENT.getModelClient().sandboxOps().objectAttributesOps().update(obj.getKey(), new ModelSDK.UpdateEntity("new dp", "new desc"));
+        CLIENT.getModelClient().sandboxOps().objectAttributesOps().deploy(obj.getKey());
+
+        OwnerAttribute owner = new OwnerAttribute(genKey + "-owner", "dp", "desc", "FLOAT", "none");
+        CLIENT.getModelClient().sandboxOps().ownerAttributesOps().createOne(owner);
+        CLIENT.getModelClient().sandboxOps().ownerAttributesOps().update(owner.getKey(), new ModelSDK.UpdateEntity("new dp", "new desc"));
+        CLIENT.getModelClient().sandboxOps().ownerAttributesOps().deploy(owner.getKey());
+
+
+        CLIENT.getModelClient().sandboxOps().objectTypesOps().delete(ot.getKey());
+        CLIENT.getModelClient().sandboxOps().eventTypesOps().delete(et.getKey());
     }
 
     private static InputStream openResource(String filename) {
