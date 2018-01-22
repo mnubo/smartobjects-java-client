@@ -52,7 +52,7 @@
 
 Introduction
 ============
-This is a Java implementation of the [API documentation](https://sop.mtl.mnubo.com/apps/doc/?i=t).
+This is a Java implementation of the [API documentation](https://smartobjects.mnubo.com/documentation/).
 
 Architecture
 ============
@@ -103,7 +103,7 @@ There are different ways to obtain a client instance:
 ### Configuration with client/secret
 Using this method, three parameters are required:
 
-* host 
+* host
 * consumer key
 * consumer secret
 
@@ -122,7 +122,7 @@ MnuboSDKClient mnuboClientWithBackoff = MnuboSDKFactory.getClient( HOST , CONSUM
 ### Configuration with a static token
 It is not recommended to use this method in production because your token has an expiry date and this method will not refresh it automatically. Two parameters are required:
 
-* host 
+* host
 * token
 
 ```
@@ -346,7 +346,7 @@ OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
 mnuboOwnersClient.batchClaim(Arrays.asList(
     new ClaimOrUnclaim("john.smith@mycompany.com", "my_device_Id"),
-    new ClaimOrUnclaim("freddy@mycompany.com", "my_device_Id2", Collections.singletonMap("x_timestamp", "2017-04-26T07:38:36+00:00")) 
+    new ClaimOrUnclaim("freddy@mycompany.com", "my_device_Id2", Collections.singletonMap("x_timestamp", "2017-04-26T07:38:36+00:00"))
 ));
 ```
 
@@ -367,7 +367,7 @@ OwnersSDK mnuboOwnersClient = mnuboClient.getOwnerClient();
 
 mnuboOwnersClient.batchUnclaim(Arrays.asList(
     new ClaimOrUnclaim("john.smith@mycompany.com", "my_device_Id"),
-    new ClaimOrUnclaim("freddy@mycompany.com", "my_device_Id2", Collections.singletonMap("x_timestamp", "2017-04-26T07:38:36+00:00")) 
+    new ClaimOrUnclaim("freddy@mycompany.com", "my_device_Id2", Collections.singletonMap("x_timestamp", "2017-04-26T07:38:36+00:00"))
 ));
 ```
 
@@ -848,13 +848,47 @@ Model
 
 The SDK allows you to retrieve the model in the current zone (production or sandbox).
 
-This example describes how to do so:
+This example shows different methods to view the current data model:
+
 ```java
 MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
 Model model = mnuboClient.getModelClient().export();
+Set<Timeseries> tss = mnuboClient.getModelClient().getTimeseries();
+Set<ObjectAttribute> objs = mnuboClient.getModelClient().getObjectAttributes();
+Set<OwnerAttribute> owners = mnuboClient.getModelClient().getOwnerAttributes();
+Set<ObjectType> objectTypes = mnuboClient.getModelClient().getObjectTypes();
+Set<EventType> eventTypes = mnuboClient.getModelClient().getEventTypes();
 ```
 
-See [mnubo documentation](https://smartobjects.mnubo.com/apps/doc/api_search.html#get-api-v3-model-export) for more information.
+You can use the SDK to update the data model as well. Note that these actions are only
+available from a SDK configured in sandbox. This example shows how to create and deploy
+a timeseries (with an event type), an owner attribute and an object attribute(with
+an object type):
+
+```java
+MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
+EventType et = new EventType("genKey", "desc", "scheduled", Collections.<String>emptySet());
+mnuboClientgetModelClient().sandboxOps().eventTypesOps().createOne(et);
+
+ObjectType ot = new ObjectType("genKey", "desc", Collections.<String>emptySet());
+mnuboClientgetModelClient().sandboxOps().objectTypesOps().createOne(ot);
+
+Timeseries ts = new Timeseries("-ts", "dp", "desc", "TEXT", Collections.singleton(et.getKey()));
+mnuboClientgetModelClient().sandboxOps().timeseriesOps().createOne(ts);
+mnuboClientgetModelClient().sandboxOps().timeseriesOps().deploy(ts.getKey());
+
+ObjectAttribute obj = new ObjectAttribute("-object", "dp", "desc", "DOUBLE", "none", Collections.singleton(ot.getKey()));
+mnuboClientgetModelClient().sandboxOps().objectAttributesOps().createOne(obj);
+mnuboClientgetModelClient().sandboxOps().objectAttributesOps().deploy(obj.getKey());
+
+OwnerAttribute owner = new OwnerAttribute("-owner", "dp", "desc", "FLOAT", "none");
+mnuboClientgetModelClient().sandboxOps().ownerAttributesOps().createOne(owner);
+mnuboClientgetModelClient().sandboxOps().ownerAttributesOps().deploy(owner.getKey());
+
+```
+
+
+You can also see [mnubo documentation](https://smartobjects.mnubo.com/documentation/api_modeler.html) for more information.
 
 Searching
 ---------
@@ -863,7 +897,7 @@ The SDK support sending search query to namespace datasets:
 1. Request an SearchSDK interface using the mnubo client instance.
 2. Provide your MQL query as a string.
 
-See [mnubo documentation](https://sop.mtl.mnubo.com/apps/doc/?i=t) for details on MQL format.
+See [mnubo documentation](https://smartobjects.mnubo.com/documentation/) for details on MQL format.
 
 ### Sending search query
 
@@ -964,7 +998,7 @@ References
 
 [maven](https://maven.apache.org/)
 
-[mnubo documentation](https://sop.mtl.mnubo.com/apps/doc/?i=t)
+[mnubo documentation](https://smartobjects.mnubo.com/documentation/)
 
 
 Configuring the example
