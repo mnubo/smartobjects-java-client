@@ -2,7 +2,10 @@ package com.mnubo.java.sdk.client.services;
 
 import static com.mnubo.java.sdk.client.Constants.CLIENT_VALIDATE_INACTIVITY_SERVER;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 import com.mnubo.java.sdk.client.mapper.GzipRequestInterceptor;
 import org.apache.http.HttpHost;
@@ -12,8 +15,8 @@ import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -23,6 +26,7 @@ import com.mnubo.java.sdk.client.config.MnuboSDKConfig;
 import com.mnubo.java.sdk.client.mapper.ObjectMapperConfig;
 
 class HttpRestTemplate {
+    final String version = "Java/" + SDKVersionInfo.loadVersion();
     private RestTemplate restTemplate;
 
     HttpRestTemplate(MnuboSDKConfig config) {
@@ -30,6 +34,14 @@ class HttpRestTemplate {
         ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
         restTemplate = new RestTemplate(requestFactory);
         configureMapper(ObjectMapperConfig.genericObjectMapper);
+
+        restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
+            @Override
+            public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+                request.getHeaders().add("X-MNUBO-SDK", version);
+                return execution.execute(request, body);
+            }
+        });
 
         if(!config.isHttpDisableContentCompression()){
             restTemplate.getInterceptors().add(new GzipRequestInterceptor());
@@ -88,4 +100,21 @@ class HttpRestTemplate {
         return restTemplate;
     }
 
+    private static class SDKVersionInfo {
+        private static String loadVersion() {
+            try {
+                Properties vprops = new Properties();
+                vprops.load(HttpRestTemplate.class.getClassLoader().getResourceAsStream("version.properties"));
+                return vprops.getProperty("version", "unknown");
+            } catch (IOException e) {
+                final String packageVersion = SDKVersionInfo.class.getPackage().getImplementationVersion();
+                if (packageVersion != null) {
+                    return packageVersion;
+                } else {
+                    return "unknown-error";
+                }
+
+            }
+        }
+    }
 }
