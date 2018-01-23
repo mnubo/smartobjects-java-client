@@ -868,22 +868,22 @@ an object type):
 ```java
 MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET );
 EventType et = new EventType("genKey", "desc", "scheduled", Collections.<String>emptySet());
-mnuboClientgetModelClient().sandboxOps().eventTypesOps().createOne(et);
+mnuboClient.getModelClient().sandboxOps().eventTypesOps().createOne(et);
 
 ObjectType ot = new ObjectType("genKey", "desc", Collections.<String>emptySet());
-mnuboClientgetModelClient().sandboxOps().objectTypesOps().createOne(ot);
+mnuboClient.getModelClient().sandboxOps().objectTypesOps().createOne(ot);
 
 Timeseries ts = new Timeseries("-ts", "dp", "desc", "TEXT", Collections.singleton(et.getKey()));
-mnuboClientgetModelClient().sandboxOps().timeseriesOps().createOne(ts);
-mnuboClientgetModelClient().sandboxOps().timeseriesOps().deploy(ts.getKey());
+mnuboClient.getModelClient().sandboxOps().timeseriesOps().createOne(ts);
+mnuboClient.getModelClient().sandboxOps().timeseriesOps().deploy(ts.getKey());
 
 ObjectAttribute obj = new ObjectAttribute("-object", "dp", "desc", "DOUBLE", "none", Collections.singleton(ot.getKey()));
-mnuboClientgetModelClient().sandboxOps().objectAttributesOps().createOne(obj);
-mnuboClientgetModelClient().sandboxOps().objectAttributesOps().deploy(obj.getKey());
+mnuboClient.getModelClient().sandboxOps().objectAttributesOps().createOne(obj);
+mnuboClient.getModelClient().sandboxOps().objectAttributesOps().deploy(obj.getKey());
 
 OwnerAttribute owner = new OwnerAttribute("-owner", "dp", "desc", "FLOAT", "none");
-mnuboClientgetModelClient().sandboxOps().ownerAttributesOps().createOne(owner);
-mnuboClientgetModelClient().sandboxOps().ownerAttributesOps().deploy(owner.getKey());
+mnuboClient.getModelClient().sandboxOps().ownerAttributesOps().createOne(owner);
+mnuboClient.getModelClient().sandboxOps().ownerAttributesOps().deploy(owner.getKey());
 
 ```
 
