@@ -1,6 +1,47 @@
 [![Build status](https://travis-ci.org/mnubo/smartobjects-java-client.svg?branch=master)](https://travis-ci.org/mnubo/smartobjects-java-client.svg?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.mnubo/java-sdk-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.mnubo/java-sdk-client)
 
+## Quickstart
+
+[comment]: # (Important: leave the HTML in this section)
+[comment]: # (quickstart-setup)
+
+<h3>Getting the client library</h3>
+<p>The client library is available on <a target="_blank" href="http://search.maven.org/#artifactdetails%7Ccom.mnubo%7Cjava-sdk-client%7C1.12.0%7Cjar">maven</a>.</p>
+
+<p>You can get started quickly by adding the following to your pom file:</p>
+<pre>
+    <code>
+&lt;dependency&gt;
+    &lt;groupId&gt;com.mnubo&lt;/groupId&gt;
+    &lt;artifactId&gt;java-sdk-client&lt;/artifactId&gt;
+    &lt;version&gt;1.12.0&lt;/version&gt;
+&lt;/dependency&gt;
+    </code>
+</pre>
+
+<p>For more information, visit <a target="_blank" href="https://github.com/mnubo/smartobjects-java-client">GitHub</a>.</p>
+
+<h3>Create a client instance</h3>
+
+<p>The following Java code can be used to create an instance:</p>
+
+<pre>
+    <code>
+import com.mnubo.java.sdk.client.services.MnuboSDKFactory;
+import com.mnubo.java.sdk.client.spi.MnuboSDKClient;
+
+final String host = "<%= hostname %>;
+final String clientKey = "<%= clientKey %>";
+final String clientSecret = "<%= clientSecret %>";
+
+final MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient(host , clientKey, clientSecret);
+    </code>
+</pre>
+
+[comment]: # (quickstart-setup)
+
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
