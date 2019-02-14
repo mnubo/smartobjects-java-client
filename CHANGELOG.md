@@ -4,6 +4,12 @@
 
 
 * Update vulnerable dependencies
+<a name='1.12.1'></a>
+
+# [1.12.1](https://github.com/mnubo/smartobjects-java-client/compare/1.12.0...1.12.1) (2019-02-14)
+
+
+* Update vulnerable dependencies
 <a name='1.12.0'></a>
 
 # [1.12.0](https://github.com/mnubo/smartobjects-java-client/compare/1.11.0...1.12.0) (2018-01-23)
