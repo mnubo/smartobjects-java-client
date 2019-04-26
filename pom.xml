@@ -296,6 +296,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
                 <configuration>
+                    <!-- https://stackoverflow.com/questions/53010200/maven-surefire-could-not-find-forkedbooter-class -->
+                    <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
                     <excludes>
                         <exclude>${test.excludes}</exclude>
                     </excludes>
