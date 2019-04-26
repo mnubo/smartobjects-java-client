@@ -14,7 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,8 +97,9 @@ public class SdkClientIntegrationTest {
         try {
             CLIENT.getOwnerClient().create(invalidOwner);
             fail("should fail because the payload contain an unknown owner attribute");
-        } catch (HttpStatusCodeException ex) {
+        } catch (RestClientException ex) {
             //expected
+            assertThat(ex.getMessage(), containsString("400 Bad Request with body: Unknown field 'unknown'"));
         }
 
         final String newValue = "newValue";
@@ -152,8 +153,9 @@ public class SdkClientIntegrationTest {
                         .build();
         try {
             CLIENT.getObjectClient().create(invalidOwner);
-        } catch (HttpStatusCodeException ex) {
+        } catch (RestClientException ex) {
             //expected
+            assertThat(ex.getMessage(), containsString("400 Bad Request with body: Unknown field 'unknown'"));
         }
 
         final String newValue = "newValue";
