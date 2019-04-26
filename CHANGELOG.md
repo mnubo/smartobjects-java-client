@@ -1,3 +1,10 @@
+<a name='1.13.0'></a>
+
+# [1.13.0](https://github.com/mnubo/smartobjects-java-client/compare/1.12.1...1.13.0) (2019-04-26)
+
+
+* Update to the rest template to add the response body in the exception message
+This potentially a breaking changes if you were catching HttpClientErrorException.
 <a name='1.12.1'></a>
 
 # [1.12.1](https://github.com/mnubo/smartobjects-java-client/compare/1.12.0...1.12.1) (2019-02-14)
