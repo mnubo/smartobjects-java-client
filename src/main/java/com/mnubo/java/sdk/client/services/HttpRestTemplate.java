@@ -19,7 +19,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mnubo.java.sdk.client.config.MnuboSDKConfig;
@@ -40,6 +40,27 @@ class HttpRestTemplate {
             public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
                 request.getHeaders().add("X-MNUBO-SDK", version);
                 return execution.execute(request, body);
+            }
+        });
+
+        restTemplate.setErrorHandler(new ResponseErrorHandler() {
+            private final ResponseErrorHandler defaultErrorHandler = new DefaultResponseErrorHandler();
+            @Override
+            public boolean hasError(ClientHttpResponse response) throws IOException {
+                return defaultErrorHandler.hasError(response);
+            }
+
+            @Override
+            public void handleError(ClientHttpResponse response) throws IOException {
+                try {
+                    defaultErrorHandler.handleError(response);
+                } catch (HttpClientErrorException clientError) {
+                    String bodyContent = clientError.getResponseBodyAsString();
+                    String bodyMessage = bodyContent != null && !bodyContent.trim().isEmpty() ? " with body: " + bodyContent : "";
+                    String message = clientError.getStatusCode().toString() + " "  + clientError.getStatusText() + bodyMessage;
+
+                    throw new RestClientException(message, clientError);
+                }
             }
         });
 
