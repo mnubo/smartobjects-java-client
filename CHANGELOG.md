@@ -1,3 +1,9 @@
+<a name='1.13.1'></a>
+
+# [1.13.1](https://github.com/mnubo/smartobjects-java-client/compare/1.13.0...1.13.1) (2019-05-23)
+
+
+* Patch version change in jackson to fix CVE
 <a name='1.13.0'></a>
 
 # [1.13.0](https://github.com/mnubo/smartobjects-java-client/compare/1.12.1...1.13.0) (2019-04-26)
