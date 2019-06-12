@@ -234,6 +234,28 @@ public interface ModelSDK {
          * @param key of the instance of type A to delete
          */
         void delete(String key);
+
+        /**
+         * Add a relation to the entity identified by `key`.
+         *
+         * - Object Types => `entityKey` is an object attribute key
+         * - Event Types => `entityKey` is a timeseries key
+         *
+         * @param typeKey identifier of the instance of type A
+         * @param entityKey identifier of the instance to add a relation to
+         */
+        A addRelation(String typeKey, String entityKey);
+
+        /**
+         * Remove a relation to the entity identified by `key`.
+         *
+         * - Object Types => key is an object attribute key
+         * - Event Types => key is a timeseries key
+         *
+         * @param typeKey identifier of the instance of type A
+         * @param entityKey identifier of the instance to remove a relation to
+         */
+        void removeRelation(String typeKey, String entityKey);
     }
 
     /**

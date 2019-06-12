@@ -917,10 +917,14 @@ mnuboClient.getModelClient().sandboxOps().objectTypesOps().createOne(ot);
 Timeseries ts = new Timeseries("-ts", "dp", "desc", "TEXT", Collections.singleton(et.getKey()));
 mnuboClient.getModelClient().sandboxOps().timeseriesOps().createOne(ts);
 mnuboClient.getModelClient().sandboxOps().timeseriesOps().deploy(ts.getKey());
+mnuboClient.getModelClient().sandboxOps().eventTypesOps().addRelation(et.getKey(), ts.getKey());
+mnuboClient.getModelClient().sandboxOps().eventTypesOps().removeRelation(et.getKey(), ts.getKey());
 
 ObjectAttribute obj = new ObjectAttribute("-object", "dp", "desc", "DOUBLE", "none", Collections.singleton(ot.getKey()));
 mnuboClient.getModelClient().sandboxOps().objectAttributesOps().createOne(obj);
 mnuboClient.getModelClient().sandboxOps().objectAttributesOps().deploy(obj.getKey());
+mnuboClient.getModelClient().sandboxOps().objectTypesOps().addRelation(ot.getKey(), obj.getKey());
+mnuboClient.getModelClient().sandboxOps().objectTypesOps().removeRelation(ot.getKey(), obj.getKey());
 
 OwnerAttribute owner = new OwnerAttribute("-owner", "dp", "desc", "FLOAT", "none");
 mnuboClient.getModelClient().sandboxOps().ownerAttributesOps().createOne(owner);

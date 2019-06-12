@@ -39,8 +39,8 @@ class ModelSDKServices implements ModelSDK {
         objectsOps = new SandboxEntityOpsImpl<>(this.sdkCommonServices, objBasePath);
         ownersOps = new SandboxEntityOpsImpl<>(this.sdkCommonServices, ownersBasePath);
 
-        objectTypesOps = new SandboxTypeOpsImpl<>(this.sdkCommonServices, objectTypesBasePath);
-        eventTypesOps = new SandboxTypeOpsImpl<>(this.sdkCommonServices, eventTypesBasePath);
+        objectTypesOps = new SandboxTypeOpsImpl<>(this.sdkCommonServices, objectTypesBasePath, objBasePath);
+        eventTypesOps = new SandboxTypeOpsImpl<>(this.sdkCommonServices, eventTypesBasePath, tsBasePath);
 
         resetOps = new ResetOpsImpl(this.sdkCommonServices);
 
@@ -201,10 +201,12 @@ class ModelSDKServices implements ModelSDK {
 
         private final SDKService sdkCommonServices;
         private final String basePath;
+        private final String entityBasePath;
 
-        SandboxTypeOpsImpl(SDKService sdkCommonServices, String basePath) {
+        SandboxTypeOpsImpl(SDKService sdkCommonServices, String basePath, String entityBasePath) {
             this.sdkCommonServices = sdkCommonServices;
             this.basePath = basePath;
+            this.entityBasePath = entityBasePath;
         }
 
         @Override
@@ -232,6 +234,32 @@ class ModelSDKServices implements ModelSDK {
         public void delete(String key) {
             this.sdkCommonServices.deleteRequest(
                 this.sdkCommonServices.getModelBaseUri().path(this.basePath).path("/" + key).toUriString()
+            );
+        }
+
+        @Override
+        public A addRelation(String typeKey, String entityKey) {
+            return this.sdkCommonServices.postRequest(
+                this.sdkCommonServices.getModelBaseUri()
+                    .path(this.basePath)
+                    .path("/" + typeKey)
+                    .path(entityBasePath)
+                    .path("/" + entityKey)
+                    .toUriString(),
+                new ParameterizedTypeReference<A>() {},
+                null
+            );
+        }
+
+        @Override
+        public void removeRelation(String typeKey, String entityKey) {
+            this.sdkCommonServices.deleteRequest(
+                this.sdkCommonServices.getModelBaseUri()
+                    .path(this.basePath)
+                    .path("/" + typeKey)
+                    .path(entityBasePath)
+                    .path("/" + entityKey)
+                    .toUriString()
             );
         }
     }

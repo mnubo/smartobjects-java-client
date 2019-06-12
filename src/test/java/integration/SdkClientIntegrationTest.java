@@ -515,19 +515,29 @@ public class SdkClientIntegrationTest {
         String genKey = UUID.randomUUID().toString().replace("-", "");
         EventType et = new EventType(genKey, "desc", "scheduled", Collections.<String>emptySet());
         CLIENT.getModelClient().sandboxOps().eventTypesOps().createOne(et);
+        EventType etWithRelation = new EventType(genKey + "-relation", "", "scheduled", Collections.<String>emptySet());;
+        CLIENT.getModelClient().sandboxOps().eventTypesOps().createOne(etWithRelation);
 
         ObjectType ot = new ObjectType(genKey, "desc", Collections.<String>emptySet());
         CLIENT.getModelClient().sandboxOps().objectTypesOps().createOne(ot);
+        ObjectType otWithRelation = new ObjectType(genKey + "-relation", "desc", Collections.<String>emptySet());
+        CLIENT.getModelClient().sandboxOps().objectTypesOps().createOne(otWithRelation);
 
         Timeseries ts = new Timeseries(genKey + "-ts", "dp", "desc", "TEXT", Collections.singleton(et.getKey()));
         CLIENT.getModelClient().sandboxOps().timeseriesOps().createOne(ts);
         CLIENT.getModelClient().sandboxOps().timeseriesOps().update(ts.getKey(), new ModelSDK.UpdateEntity("new dp", "new desc"));
         CLIENT.getModelClient().sandboxOps().timeseriesOps().deploy(ts.getKey());
 
+        CLIENT.getModelClient().sandboxOps().eventTypesOps().addRelation(et.getKey(), ts.getKey());
+        CLIENT.getModelClient().sandboxOps().eventTypesOps().removeRelation(et.getKey(), ts.getKey());
+
         ObjectAttribute obj = new ObjectAttribute(genKey + "-object", "dp", "desc", "DOUBLE", "none", Collections.singleton(ot.getKey()));
         CLIENT.getModelClient().sandboxOps().objectAttributesOps().createOne(obj);
         CLIENT.getModelClient().sandboxOps().objectAttributesOps().update(obj.getKey(), new ModelSDK.UpdateEntity("new dp", "new desc"));
         CLIENT.getModelClient().sandboxOps().objectAttributesOps().deploy(obj.getKey());
+
+        CLIENT.getModelClient().sandboxOps().objectTypesOps().addRelation(ot.getKey(), obj.getKey());
+        CLIENT.getModelClient().sandboxOps().objectTypesOps().removeRelation(ot.getKey(), obj.getKey());
 
         OwnerAttribute owner = new OwnerAttribute(genKey + "-owner", "dp", "desc", "FLOAT", "none");
         CLIENT.getModelClient().sandboxOps().ownerAttributesOps().createOne(owner);
