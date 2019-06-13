@@ -1,3 +1,9 @@
+<a name='1.14.0'></a>
+
+# [1.14.0](https://github.com/mnubo/smartobjects-java-client/compare/1.13.1...1.14.0) (2019-06-13)
+
+
+* Support for new model operations. addRelation / removeRelation
 <a name='1.13.1'></a>
 
 # [1.13.1](https://github.com/mnubo/smartobjects-java-client/compare/1.13.0...1.13.1) (2019-05-23)
