@@ -57,7 +57,7 @@ final MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient(host , clientKey, c
 - [Usage](#usage)
   - [Getting a "MnuboSDKClient" (client) instance](#getting-a-mnubosdkclient-client-instance)
     - [Configuration with client/secret](#configuration-with-clientsecret)
-    - [Configuration with a static token](#configuration-with-a-static-token)
+    - [Configuration with a static token](#configuration-with-an-app-token)
   - [Creating owners](#creating-owners)
   - [Updating owners](#updating-owners)
   - [Create or update a batch of Owners](#create-or-update-a-batch-of-owners)
@@ -160,8 +160,11 @@ MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CO
 MnuboSDKClient mnuboClientWithBackoff = MnuboSDKFactory.getClient( HOST , CONSUMER_KEY , CONSUMER_SECRET, new ExponentialBackoffConfig());
 ```
 
-### Configuration with a static token
-It is not recommended to use this method in production because your token has an expiry date and this method will not refresh it automatically. Two parameters are required:
+### Configuration with an app token
+
+You can generate an App Token from the web application and use it with this SDK.
+
+Note: App Tokens can have restricted access to specific APIs and can be disabled by an administrator at any given time. This means that some API provided in this SDK may not work correctly.
 
 * host
 * token
