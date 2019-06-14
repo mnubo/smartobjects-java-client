@@ -57,7 +57,7 @@ final MnuboSDKClient mnuboClient = MnuboSDKFactory.getClient(host , clientKey, c
 - [Usage](#usage)
   - [Getting a "MnuboSDKClient" (client) instance](#getting-a-mnubosdkclient-client-instance)
     - [Configuration with client/secret](#configuration-with-clientsecret)
-    - [Configuration with a static token](#configuration-with-an-app-token)
+    - [Configuration with an app token](#configuration-with-an-app-token)
   - [Creating owners](#creating-owners)
   - [Updating owners](#updating-owners)
   - [Create or update a batch of Owners](#create-or-update-a-batch-of-owners)
