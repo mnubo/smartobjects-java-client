@@ -1,3 +1,9 @@
+<a name='1.14.1'></a>
+
+# [1.14.1](https://github.com/mnubo/smartobjects-java-client/compare/1.14.0...1.14.1) (2019-07-19)
+
+
+* Bug fix in the retry logic
 <a name='1.14.0'></a>
 
 # [1.14.0](https://github.com/mnubo/smartobjects-java-client/compare/1.13.1...1.14.0) (2019-06-13)
