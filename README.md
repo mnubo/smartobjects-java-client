@@ -7,7 +7,7 @@
 [comment]: # (quickstart-setup)
 
 <h3>Getting the client library</h3>
-<p>The client library is available on <a target="_blank" href="http://search.maven.org/#artifactdetails%7Ccom.mnubo%7Cjava-sdk-client%7C1.12.0%7Cjar">maven</a>.</p>
+<p>The client library is available on <a target="_blank" href="http://search.maven.org/#artifactdetails%7Ccom.mnubo%7Cjava-sdk-client%7C1.14.1%7Cjar">maven</a>.</p>
 
 <p>You can get started quickly by adding the following to your pom file:</p>
 <pre>
@@ -15,7 +15,7 @@
 &lt;dependency&gt;
     &lt;groupId&gt;com.mnubo&lt;/groupId&gt;
     &lt;artifactId&gt;java-sdk-client&lt;/artifactId&gt;
-    &lt;version&gt;1.12.0&lt;/version&gt;
+    &lt;version&gt;1.14.1&lt;/version&gt;
 &lt;/dependency&gt;
     </code>
 </pre>
