@@ -229,9 +229,15 @@ class SDKService {
                 @Override
                 public boolean canRetry(RetryContext context) {
                     Throwable t = context.getLastThrowable();
-                    HttpServerErrorException serverError = (HttpServerErrorException) t;
-                    return t == null || (serverError.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE &&
-                            context.getRetryCount() < this.getMaxAttempts());
+                    if (t == null && context.getRetryCount() <= 0) {
+                        return true;
+                    } else if (t instanceof HttpServerErrorException) {
+                        HttpServerErrorException serverError = (HttpServerErrorException) t;
+                        return (serverError.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE &&
+                                context.getRetryCount() < this.getMaxAttempts());
+                    } else {
+                        return false;
+                    }
                 }
             };
 

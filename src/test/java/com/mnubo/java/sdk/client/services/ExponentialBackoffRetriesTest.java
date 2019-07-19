@@ -17,6 +17,7 @@ import org.restlet.data.Status;
 import org.restlet.routing.Router;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.UnknownHttpStatusCodeException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +48,15 @@ public class ExponentialBackoffRetriesTest {
                 @SneakyThrows
                 public void handle(org.restlet.Request request, Response response) {
                     response.setStatus(Status.SERVER_ERROR_INTERNAL);
+                    response.setEntity("Oops", MediaType.TEXT_PLAIN);
+                }
+            };
+            Restlet unpredictedError = new Restlet(ctx.restletContext) {
+                @Override
+                @SneakyThrows
+                public void handle(org.restlet.Request request, Response response) {
+                    //unknown status that triggers a different RestClientException
+                    response.setStatus(Status.valueOf(495));
                     response.setEntity("Oops", MediaType.TEXT_PLAIN);
                 }
             };
@@ -85,6 +95,7 @@ public class ExponentialBackoffRetriesTest {
             ctx.router.setDefaultMatchingMode(Router.MODE_FIRST_MATCH);
 
             ctx.router.attach(ctx.baseUrl + "/oauth/token", auth);
+            ctx.router.attach(ctx.baseUrl + "/unpredictedError", unpredictedError);
             ctx.router.attach(ctx.baseUrl + "/internalError", internalError);
             ctx.router.attach(ctx.baseUrl + "/success", success);
             ctx.router.attach(ctx.baseUrl + "/unavailable/{path}", route);
@@ -118,6 +129,11 @@ public class ExponentialBackoffRetriesTest {
     @Test(expected = HttpServerErrorException.class)
     public void shouldNotRetryOnInternalServerError() {
         client(ExponentialBackoffConfig.DEFAULT).postRequest(server.baseUrl + "/internalError");
+    }
+
+    @Test(expected = UnknownHttpStatusCodeException.class)
+    public void shouldNotRetryOnRandomError() {
+        client(ExponentialBackoffConfig.DEFAULT).postRequest(server.baseUrl + "/unpredictedError");
     }
 
     @Test
