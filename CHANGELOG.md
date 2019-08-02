@@ -1,3 +1,9 @@
+<a name='1.14.2'></a>
+
+# [1.14.2](https://github.com/mnubo/smartobjects-java-client/compare/1.14.1...1.14.2) (2019-08-02)
+
+
+* Update jackson-databind version
 <a name='1.14.1'></a>
 
 # [1.14.1](https://github.com/mnubo/smartobjects-java-client/compare/1.14.0...1.14.1) (2019-07-19)
