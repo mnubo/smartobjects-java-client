@@ -4,7 +4,7 @@
 
     <packaging>jar</packaging>
     <groupId>com.mnubo</groupId>
-    <version>1.14.2</version>
+    <version>1.14.3</version>
     <artifactId>java-sdk-client</artifactId>
     <description>Contains Mnubo java SDK client.</description>
     <name>${project.groupId}:${project.artifactId}</name>
